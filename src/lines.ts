@@ -1,8 +1,24 @@
 /*jslint todo: true, continue: true, white: true*/
 
+import { JSONPosition } from "./JSONGeometry";
+
 // Written by Alex Canales for ShopBotTools, Inc.
 
 var util = require("./util");
+
+export interface G3Commands {
+    r?: number,
+    i?: number,
+    j?: number,
+    k?: number
+}
+
+export interface CNCSettings {
+    feedrate: number,
+    inMm: boolean,
+    crossAxe: 'x'|'y'|'z'
+
+}
 
 /**
  * This file contains the classes managing the lines. The lines are
@@ -20,7 +36,7 @@ var util = require("./util");
  * @param {Settings} settings - The modularity settings.
  * @return {StraightLine} An instance of the StraightLine class.
  */
-var StraightLine = function(index, start, end, parsedCommand, settings) {
+export function StraightLine(index, start, end, parsedCommand, settings) {
     "use strict";
     var that = this;
 
@@ -94,7 +110,7 @@ var StraightLine = function(index, start, end, parsedCommand, settings) {
  * @param {Settings} settings - The modularity settings.
  * @return {CurvedLine} An instance of the CurvedLine class.
  */
-var CurvedLine = function(index, start, end, parsedCommand, settings) {
+export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition, parsedCommand:G3Commands, settings:CNCSettings){
     "use strict";
     var that = this;
 
@@ -122,7 +138,7 @@ var CurvedLine = function(index, start, end, parsedCommand, settings) {
     //radius > 0
     //From Richard A DeVeneza's work
     function cubBez2DInt(angle, radius) {
-        var p0 = {}, p1 = {}, p2 ={}, p3 = {};
+        var p0: Partial<JSONPosition> = {}, p1: Partial<JSONPosition> = {}, p2: Partial<JSONPosition> ={}, p3: Partial<JSONPosition> = {};
         angle = Math.abs(angle);
         if(angle === Math.PI / 2) {
             //cos(PI/4) == sin(PI/4) but JavaScript doesn't believe it
@@ -266,6 +282,7 @@ var CurvedLine = function(index, start, end, parsedCommand, settings) {
     }
 
     function arcToBezier() {
+        // console.log('00000000000\n',that)
         var num90 = 0, numSmall = 1;  //Number arc = pi/2 and arc < pi/2
         var bez90 = {}, bezSmall = {};
         var p90 = 0, pLittle = 0, pAngle = 0; //Pitch of the arcs
@@ -280,7 +297,8 @@ var CurvedLine = function(index, start, end, parsedCommand, settings) {
         //Find number of diferent sections
         if(absAngle > halfPI) {
             //Untrustful (as this language) function, should be tested:
-            num90 = parseInt(absAngle / halfPI, 10);
+            num90 = parseInt(""+(absAngle / halfPI), 10);
+            //num90 = absAngle / halfPI
             numSmall = (absAngle % halfPI !== 0) ? 1 : 0;
         }
 
@@ -423,9 +441,9 @@ var CurvedLine = function(index, start, end, parsedCommand, settings) {
     }
 
     //radius is positive or negative
-    function findCenter(start, end, parsedCommand, clockwise, crossAxe, inMm) {
+    function findCenter(start: JSONPosition, end: JSONPosition, parsedCommand, clockwise, crossAxe, inMm) {
         var delta = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
-        var center = { x : start.x, y : start.y, z : start.z };
+        var center: JSONPosition | false = { x : start.x, y : start.y, z : start.z };
         var distCenterStart, distCenterEnd;
         var axes = util.findAxes(crossAxe);
 
@@ -544,6 +562,3 @@ var CurvedLine = function(index, start, end, parsedCommand, settings) {
 
     initialize(index, start, parsedCommand, settings);
 };
-
-exports.StraightLine = StraightLine;
-exports.CurvedLine = CurvedLine;

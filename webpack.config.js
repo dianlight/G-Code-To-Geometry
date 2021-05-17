@@ -1,12 +1,21 @@
 var path = require("path");
 module.exports = {
+    mode: 'production',
     entry: {
-        gcodetogeometry : "./node-package/gcodetogeometry.js"
+        gcodetogeometry: "./src/gcodetogeometry.js"
     },
     output: {
-        path: path.join(__dirname, "browser"),
+        path: path.join(__dirname, "dist"),
         filename: "[name].js",
-        library: "gcodetogeometry",
-        libraryTarget: "umd"
-    }
+        library: {
+            name: "gcodetogeometry",
+            type: "umd"
+        }
+    },
+    devtool: 'eval-source-map',
+    devServer: {
+        contentBase: path.join(__dirname, 'test'),
+        compress: true,
+        port: 9000,
+    },
 };

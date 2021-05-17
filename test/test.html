@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>To geometry</title>
 </head>
+
 <body>
     <textarea id="gcode" name="" cols="30" rows="10"></textarea>
     <button id="test">Test</button>
 
     <!-- <script src="browser/gcodetogeometry.js"></script> -->
-    <script src="browser/gcodetogeometry.min.js"></script>
+    <script src="/gcodetogeometry.js"></script>
 
     <script type="text/javascript">
         document.getElementById("test").onclick = function() {
             var code = document.getElementById("gcode").value;
             var result = gcodetogeometry.parse(code);
-            if(result.errorList.length === 0) {
+            if (result.errorList.length === 0) {
                 alert("The GCode is completely parsed.");
             } else {
                 alert("An error or warning is raised.");
@@ -24,4 +26,5 @@
         };
     </script>
 </body>
+
 </html>
