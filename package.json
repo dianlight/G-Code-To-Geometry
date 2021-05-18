@@ -4,11 +4,13 @@
     "description": "Parse GCode into geometrical lines and curves.",
     "main": "test/test.js",
     "module": "dist/gcodetogeometry.js",
+    "types": "dist/src/gcodetogeometry.d.ts",
     "scripts": {
         "test": "jest --runInBand --logHeapUsage",
         "build": "webpack --config webpack.config.js",
         "serve": "webpack serve --mode=development --config webpack.config.js",
-        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4"
+        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4",
+        "postinstall": "npm build"
     },
     "repository": {
         "type": "git",
