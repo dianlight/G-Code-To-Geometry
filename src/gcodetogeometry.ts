@@ -466,6 +466,15 @@ export function parse(code) {
     let tokenStream = new CommonTokenStream(lexer);
     let parser = new gcodeParser(tokenStream);
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
+    parser.addErrorListener({
+        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
+            parserError.push({
+                isSkipped: true,
+                line,
+                message: '['+charPositionInLine+'] ' + msg
+            })     
+        }
+    } as ANTLRErrorListener<number>)
     let tree = parser.program()
     
 /* */
