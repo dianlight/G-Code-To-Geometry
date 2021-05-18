@@ -278,6 +278,7 @@ export class gcodeLexer extends Lexer {
 	}
 	// tslint:enable:no-trailing-whitespace
 
+
 	constructor(input: CharStream) {
 		super(input);
 		this._interp = new LexerATNSimulator(gcodeLexer._ATN, this);

@@ -46,6 +46,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
     }
 
     protected emitCurrentLine() {
+        if(!this.currentLine.type)return
         switch (this.currentLine.type) {
             case 'G0':
             case 'G1':
@@ -90,7 +91,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                     this.geometry.errorList.push({
                         line: this.currentLine.lineNumber,
                         isSkipped: true,
-                        message: "Unknown command"
+                        message: "Unknown command "+this.currentLine.type
                     })
                 break;
         }
