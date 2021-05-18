@@ -9,8 +9,7 @@
         "test": "jest --runInBand --logHeapUsage",
         "build": "webpack --config webpack.config.js",
         "serve": "webpack serve --mode=development --config webpack.config.js",
-        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4",
-        "postinstall": "npm run build"
+        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4"
     },
     "repository": {
         "type": "git",
