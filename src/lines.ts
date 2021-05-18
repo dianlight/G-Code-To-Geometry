@@ -16,8 +16,8 @@ export interface G3Commands {
 export interface CNCSettings {
     feedrate: number,
     inMm: boolean,
-    crossAxe: 'x'|'y'|'z'
-
+    crossAxe: 'x' | 'y' | 'z',
+    oldType?: 'G1'|'G0'|'G2'|'G3',
 }
 
 /**

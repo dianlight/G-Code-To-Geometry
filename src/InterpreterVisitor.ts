@@ -12,6 +12,7 @@ interface CurrentLine extends JSONGeometryLine {
     k: number
 }
 
+
 export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> implements gcodeVisitor<JSONGeometry> {
 
     geometry: JSONGeometry = {
@@ -45,13 +46,13 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         return this.geometry;
     }
 
-    protected emitCurrentLine() {
-        if(!this.currentLine.type)return
+    protected emitCurrentLine(): 'G0'|'G1'|'G2'|'G3' {
+        if(!this.currentLine.type)return undefined
         switch (this.currentLine.type) {
             case 'G0':
             case 'G1':
-                this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine);               
-                break;
+                this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine);
+                return this.currentLine.type
             case 'G2':
             case 'G3':
 
@@ -84,8 +85,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                         isSkipped: true
                     })
                 }
-
-                break;
+                return this.currentLine.type
             default:
                 if(this.currentLine.lineNumber)
                     this.geometry.errorList.push({
@@ -95,6 +95,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                     })
                 break;
         }
+        return undefined
     }
 
     /**
@@ -118,7 +119,11 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
 //        console.log("LINE", ctx.lineNumber()?.text)
 //        const stream = ctx.start.inputStream;
 //        this.geometry.gcode.push(stream.getText(new Interval(ctx.start.startIndex, ctx.stop.stopIndex)))
-        this.geometry.gcode.push(ctx.text.replace('\n',''))
+        this.geometry.gcode.push(ctx.text.replace(/\r?\n|\r/,""))
+        const oldType = this.emitCurrentLine()
+        this.currentLine = {}
+        this.currentLine.lineNumber = ctx.start.line
+        this.settings.oldType = oldType
 //        this.visit(ctx.lineNumber())
         ctx.segment().forEach(ctxx => this.visit(ctxx))
 //        this.geometry.lines.push({
@@ -239,6 +244,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
  visitI(ctx: IContext) : JSONGeometry {
     // console.log("\t\tI->",ctx.e().text)
+    if (!this.currentLine.end && this.settings.oldType) {
+        this.currentLine.start = this.shallow(this.position)
+        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.type = this.settings.oldType
+        this.currentLine.feedrate = this.settings.feedrate
+    }     
     this.currentLine.i = Number.parseFloat(ctx.e().text)
     return this.geometry
 }
@@ -250,6 +261,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
  visitJ(ctx: JContext): JSONGeometry {
     // console.log("\t\tJ->",ctx.e().text)
+    if (!this.currentLine.end && this.settings.oldType) {
+        this.currentLine.start = this.shallow(this.position)
+        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.type = this.settings.oldType
+        this.currentLine.feedrate = this.settings.feedrate
+    }     
     this.currentLine.j = Number.parseFloat(ctx.e().text)
     return this.geometry
 }
@@ -267,7 +284,13 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
     visitR(ctx: RContext): JSONGeometry {
         // console.log("\t\tR->",ctx.e().text)
-        this.currentLine.r = Number.parseFloat(ctx.e().text)
+        if (!this.currentLine.end && this.settings.oldType) {
+            this.currentLine.start = this.shallow(this.position)
+            this.currentLine.end =  this.shallow(this.position)
+            this.currentLine.type = this.settings.oldType
+            this.currentLine.feedrate = this.settings.feedrate
+        }     
+            this.currentLine.r = Number.parseFloat(ctx.e().text)
         return this.geometry
   }
 
@@ -278,6 +301,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
     visitX(ctx: XContext): JSONGeometry{
         // console.log("\t\tX->",ctx.e().text)
+        if (!this.currentLine.end && this.settings.oldType) {
+            this.currentLine.start = this.shallow(this.position)
+            this.currentLine.end =  this.shallow(this.position)
+            this.currentLine.type = this.settings.oldType
+            this.currentLine.feedrate = this.settings.feedrate
+        }
         this.currentLine.end.x = Number.parseFloat(ctx.e().text)
         this.position.x = Number.parseFloat(ctx.e().text)
         this.geometry.size.min.x = Math.min(this.geometry.size.min.x,this.position.x) 
@@ -292,7 +321,13 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
  visitY(ctx: YContext):JSONGeometry{
     // console.log("\t\tY->",ctx.e().text)
-    this.currentLine.end.y =Number.parseFloat(ctx.e().text)
+    if (!this.currentLine.end && this.settings.oldType) {
+        this.currentLine.start = this.shallow(this.position)
+        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.type = this.settings.oldType
+        this.currentLine.feedrate = this.settings.feedrate
+    }
+this.currentLine.end.y =Number.parseFloat(ctx.e().text)
     this.position.y = Number.parseFloat(ctx.e().text)
      this.geometry.size.min.y = Math.min(this.geometry.size.min.y,this.position.y) 
      this.geometry.size.max.y = Math.max(this.geometry.size.max.y,this.position.y) 
@@ -305,6 +340,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
  visitZ(ctx: ZContext):JSONGeometry{
     // console.log("\t\tZ->",ctx.e().text)
+    if (!this.currentLine.end && this.settings.oldType) {
+        this.currentLine.start = this.shallow(this.position)
+        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.type = this.settings.oldType
+        this.currentLine.feedrate = this.settings.feedrate
+    }
      this.currentLine.end.z = Number.parseFloat(ctx.e().text)
      this.position.z = Number.parseFloat(ctx.e().text)
      this.geometry.size.min.z = Math.min(this.geometry.size.min.z,this.position.z) 
@@ -326,6 +367,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   */
  visitF(ctx: FContext):JSONGeometry{
     // console.log("\t\tF->", ctx.e().text)
+    if (!this.currentLine.end && this.settings.oldType) {
+        this.currentLine.start = this.shallow(this.position)
+        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.type = this.settings.oldType
+        this.currentLine.feedrate = this.settings.feedrate
+    }     
      this.currentLine.feedrate = Number.parseFloat(ctx.e().text);
      this.settings.feedrate = Number.parseFloat(ctx.e().text)
     return this.geometry
@@ -408,7 +455,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   * Visit a parse tree produced by `gcodeParser.gWord`.
   * @param ctx the parse tree
   * @return the visitor result
-  */
+  * /
     visitGWord(ctx: GWordContext): JSONGeometry{
         // console.log("G")
         this.emitCurrentLine()
@@ -417,7 +464,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         ctx.children?.forEach(ctxx => this.visit(ctxx))
         return this.geometry
     };
-
+    /* */
 
  /**
   * Visit a parse tree produced by `gcodeParser.group1`.

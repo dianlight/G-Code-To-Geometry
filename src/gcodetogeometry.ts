@@ -2,8 +2,9 @@
 
 import { gcodeLexer } from './antlr/gcodeLexer'
 import { gcodeParser } from './antlr/gcodeParser'
-import { CharStreams, CommonTokenStream } from 'antlr4ts'
+import { ANTLRErrorListener, CharStreams, CommonTokenStream, ConsoleErrorListener, RecognitionException, Recognizer } from 'antlr4ts'
 import { InterpreterVisitor } from './InterpreterVisitor'
+import { JSONError } from 'JSONGeometry';
 
 
 var util = require("./util");
@@ -448,17 +449,33 @@ export function parse(code) {
 
 
     // Create the lexer and parser
+    const parserError: JSONError[] = []
+
     let inputStream = CharStreams.fromString(code + "\n");
     let lexer = new gcodeLexer(inputStream);
+    lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
+    lexer.addErrorListener({
+        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
+            parserError.push({
+                isSkipped: true,
+                line,
+                message: '['+charPositionInLine+'] ' + msg
+            })     
+        }
+    } as ANTLRErrorListener<number>)
     let tokenStream = new CommonTokenStream(lexer);
     let parser = new gcodeParser(tokenStream);
-
+    parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
     let tree = parser.program()
     
 /* */
     const interpreterVisitor = new InterpreterVisitor()
 
-    return interpreterVisitor.visit(tree);
+    const geometry = interpreterVisitor.visit(tree);
+
+    geometry.errorList.push(...parserError)
+
+    return geometry;
 /* */
 /* * /
     var gcode = code.split('\n');

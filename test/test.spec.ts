@@ -49,7 +49,7 @@ describe("Test GCODE Partsing capability", () => {
     })
     /* */
 
-    /* * /
+    /* */
     it('Parse Case#6 GCode - FLATCAM Test', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#6.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#6.json')).toString());
@@ -61,19 +61,19 @@ describe("Test GCODE Partsing capability", () => {
     })
     /* */
 
-    /* Multiple coordinate without G command. If allowed correct parser * /
+    /* Multiple coordinate without G command. If allowed correct parser */
     it('Parse Case#7 GCode - / G optional line splitting /', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#7.gcode')).toString();
-        const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#7.json')).toString());
+        const result = fs.readFileSync(path.join(__dirname, 'case#7.json')).toString();
         expect(GCodeToGeometry.parse).toBeDefined();
         var cresult = GCodeToGeometry.parse(code);
 //        fs.writeFileSync(path.join(__dirname, 'case#7.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
-        expect(cresult).toEqual(result);
+        expect(JSON.stringify(cresult, null, 2)).toEqual(result);
     })
     /* */
 
-    /* To many error
+    /* To many error */
     it('Parse Case#8 GCode', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#8.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#8.json')).toString());
@@ -83,7 +83,7 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
     })
-    */
+    /* */
 })
 
 
