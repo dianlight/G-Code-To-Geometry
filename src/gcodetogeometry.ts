@@ -1,10 +1,8 @@
 // Based on gcodetogeometry written by Alex Canales for ShopBotTools, Inc.
 
-import { gcodeVisitor } from './antlr/gcodeVisitor'
 import { gcodeLexer } from './antlr/gcodeLexer'
 import { gcodeParser } from './antlr/gcodeParser'
-import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor'
-import { ANTLRInputStream, CommonTokenStream } from 'antlr4ts'
+import { CharStreams, CommonTokenStream } from 'antlr4ts'
 import { InterpreterVisitor } from './InterpreterVisitor'
 
 
@@ -450,7 +448,7 @@ export function parse(code) {
 
 
     // Create the lexer and parser
-    let inputStream = new ANTLRInputStream(code);
+    let inputStream = CharStreams.fromString(code + "\n");
     let lexer = new gcodeLexer(inputStream);
     let tokenStream = new CommonTokenStream(lexer);
     let parser = new gcodeParser(tokenStream);

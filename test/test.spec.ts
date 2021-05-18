@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 
 describe("Test GCODE Partsing capability", () => {
-    it('Parse Case#1 GCode', () => {
+    it('Parse Case#1 GCode - Small Test', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#1.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#1.json')).toString());
     //    console.log(code)
@@ -17,7 +17,7 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toEqual(result);
     })
 
-    it('Parse Case#2 GCode', () => {
+    it('Parse Case#2 GCode - Micro Test', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#2.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#2.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -27,7 +27,7 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toEqual(result);
     })
 
-    it('Parse Case#3 GCode', () => {
+    it('Parse Case#3 GCode - boomerangv3 / command splitted /', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#3.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#3.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -49,7 +49,8 @@ describe("Test GCODE Partsing capability", () => {
     })
     /* */
 
-    it('Parse Case#6 GCode', () => {
+    /* * /
+    it('Parse Case#6 GCode - FLATCAM Test', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#6.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#6.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -58,9 +59,10 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
     })
+    /* */
 
-    /* Multiple coordinate without G command. If allowed correct parser */
-    it('Parse Case#7 GCode', () => {
+    /* Multiple coordinate without G command. If allowed correct parser * /
+    it('Parse Case#7 GCode - / G optional line splitting /', () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#7.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#7.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -69,6 +71,7 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
     })
+    /* */
 
     /* To many error
     it('Parse Case#8 GCode', () => {
