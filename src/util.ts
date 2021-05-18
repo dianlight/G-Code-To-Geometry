@@ -120,22 +120,22 @@
  *
  * @namespace
  */
-var util = {};
+class Util {
 
 /**
  * Constant for converting inches values into millimeters values.
  */
-util.INCH_TO_MILLIMETER = 25.4;
+INCH_TO_MILLIMETER = 25.4;
 
 /**
  * Constant for converting millimeters values into inches values.
  */
-util.MILLIMETER_TO_INCH = 0.03937008;
+MILLIMETER_TO_INCH = 0.03937008;
 
 /*
  * Precision constant for comparing floats. Used in util.nearlyEqual.
  */
-util.FLOAT_PRECISION = 0.001;
+FLOAT_PRECISION = 0.001;
 
 /*
  * Converts the feedrate in inches according to the types of unit used.
@@ -144,8 +144,8 @@ util.FLOAT_PRECISION = 0.001;
  * @param {number} inMm - If the feedrate is in millimeters.
  * Returns the feedrate in inches.
  */
-util.calculateFeedrate = function(feedrate, inMm) {
-    return (inMm === false) ? feedrate : feedrate * util.MILLIMETER_TO_INCH;
+calculateFeedrate = function(feedrate, inMm) {
+    return (inMm === false) ? feedrate : feedrate * this.MILLIMETER_TO_INCH;
 };
 
 /**
@@ -159,8 +159,8 @@ util.calculateFeedrate = function(feedrate, inMm) {
  * of the comparaison.
  * @return {boolean} True if the two values are nearly equal.
  */
-util.nearlyEqual = function(a, b, precision) {
-    var p = (precision === undefined) ? util.FLOAT_PRECISION : precision;
+nearlyEqual = function(a:number, b:number, precision?:number) {
+    const p = (precision === undefined) ? this.FLOAT_PRECISION : precision;
     return Math.abs(b - a) <= p;
 };
 
@@ -170,19 +170,18 @@ util.nearlyEqual = function(a, b, precision) {
  * @param {object} obj1 - The first object.
  * @param {object} obj2 - The second object.
 */
-util.swapObjects = function(obj1, obj2) {
+swapObjects = function(obj1, obj2) {
     function swapSingleField(objA, objB, key) {
-        var temp;
-        temp = objA[key];
+        const temp = objA[key];
         objA[key] = objB[key];
         objB[key] = temp;
     }
-    var keys = Object.keys(obj1);
-    var i = 0;
+    const keys = Object.keys(obj1);
+    let i = 0;
 
     for(i = 0; i < keys.length; i++) {
         if(typeof obj1[keys[i]] === "object") {
-            util.swapObjects(obj1[keys[i]], obj2[keys[i]]);
+            this.swapObjects(obj1[keys[i]], obj2[keys[i]]);
         } else {
             swapSingleField(obj1, obj2, keys[i]);
         }
@@ -195,13 +194,13 @@ util.swapObjects = function(obj1, obj2) {
  * @param {object} object - The object.
  * @return {object} The copy of the object.
 */
-util.copyObject = function(object) {
-    var keys = Object.keys(object);
-    var i = 0;
-    var copy = {};
+copyObject = function(object) {
+    const keys = Object.keys(object);
+    let i = 0;
+    const copy = {};
     for(i = 0; i < keys.length; i++) {
         if(typeof object[keys[i]] === "object") {
-            copy[keys[i]] = util.copyObject(object[keys[i]]);
+            copy[keys[i]] = this.copyObject(object[keys[i]]);
         } else {
             copy[keys[i]] = object[keys[i]];
         }
@@ -215,9 +214,9 @@ util.copyObject = function(object) {
  * @param {Point} point - The point to move.
  * @param {Point} vector - The vector.
  */
-util.movePoint = function(point, vector) {
-    var keys = Object.keys(vector);
-    var i = 0;
+movePoint = function(point, vector) {
+    const keys = Object.keys(vector);
+    let i = 0;
     for(i = 0; i < keys.length; i++) {
         if(point[keys[i]] !== undefined) {
             point[keys[i]] += vector[keys[i]];
@@ -232,7 +231,7 @@ util.movePoint = function(point, vector) {
  * @param {Point} v2 - The second vector.
  * @return {number} The result.
  */
-util.dotProduct2 = function(v1, v2) {
+dotProduct2 = function(v1, v2) {
     return v1.x * v2.x + v1.y * v2.y;
 };
 
@@ -243,7 +242,7 @@ util.dotProduct2 = function(v1, v2) {
  * @param {Point} v2 - The second vector.
  * @return {number} The result on the Z axis.
  */
-util.crossProduct2 = function(v1, v2) {
+crossProduct2 = function(v1, v2) {
     return v1.x * v2.y - v2.x * v1.y;
 };
 
@@ -253,7 +252,7 @@ util.crossProduct2 = function(v1, v2) {
  * @param {Point} v - The vector.
  * @return {number} The vector length.
  */
-util.lengthVector3 = function(v) {
+lengthVector3 = function(v) {
     return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 };
 
@@ -268,7 +267,7 @@ util.lengthVector3 = function(v) {
  * not "x" or "y".
  * @return {Axes} The object defining the real, imaginary and cross axis.
  */
-util.findAxes = function(crossAxe) {
+findAxes = function(crossAxe) {
     if(crossAxe.toLowerCase() === "x") {
         return { re : "y", im : "z", cr : "x"};
     }
@@ -290,12 +289,12 @@ util.findAxes = function(crossAxe) {
  * @param {string} re - The real axis.
  * @param {string} im - The imaginary axis.
  */
-util.scaleAndRotation = function(
+scaleAndRotation = function(
     center, point, newPoint, angle, length, re, im
 ) {
-    var c = center, p = point, nP = newPoint;
-    var l = length, cA = Math.cos(angle), sA = Math.sin(angle);
-    var pRe = p[re], pIm = p[im], cRe = c[re], cIm = c[im];
+    const c = center, p = point, nP = newPoint;
+    const l = length, cA = Math.cos(angle), sA = Math.sin(angle);
+    const pRe = p[re], pIm = p[im], cRe = c[re], cIm = c[im];
 
     nP[re] = l * ((pRe - cRe) * cA - (pIm - cIm) * sA) + cRe;
     nP[im] = l * ((pIm - cIm) * cA + (pRe - cRe) * sA) + cIm;
@@ -308,11 +307,11 @@ util.scaleAndRotation = function(
  * @param {Point} v2 - The second vector.
  * @return {number} The angle in radian.
  */
-util.findAngleVectors2 = function(v1, v2) {
-    var sign = (util.crossProduct2(v1, v2) < 0) ? -1 : 1;
-    var dot = util.dotProduct2(v1, v2);
-    var lV1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
-    var lV2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+findAngleVectors2 = function(v1, v2) {
+    const sign = (this.crossProduct2(v1, v2) < 0) ? -1 : 1;
+    const dot = this.dotProduct2(v1, v2);
+    const lV1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+    const lV2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
 
     if(lV1 === 0 || lV2 === 0) {
         return 0;
@@ -329,8 +328,8 @@ util.findAngleVectors2 = function(v1, v2) {
  * @param {boolean} positive - If the oriented angle goes counter-clockwise.
  * @return {number} The angle in radian.
  */
-util.findAngleOrientedVectors2 = function(v1, v2, positive) {
-    var angle =  util.findAngleVectors2(v1, v2);
+findAngleOrientedVectors2 = function(v1, v2, positive) {
+    const angle =  this.findAngleVectors2(v1, v2);
 
     if(positive === false && angle > 0) {
         return angle - Math.PI * 2;
@@ -351,12 +350,16 @@ util.findAngleOrientedVectors2 = function(v1, v2, positive) {
  * @param {number} b - The second boundary.
  * @return {boolean} The result.
  */
-util.isInclude = function(value, a, b) {
+isInclude = function(value, a, b) {
     return (b < a) ? (b <= value && value <= a) : (a <= value && value <= b);
 };
 
-var keys = Object.keys(util);
-var i = 0;
-for(i = 0; i < keys.length; i++) {
-    exports[keys[i]] = util[keys[i]];
+//const keys = Object.keys(util);
+//let i = 0;
+//for(i = 0; i < keys.length; i++) {
+//    exports[keys[i]] = util[keys[i]];
+//}
+
 }
+
+export default new Util()

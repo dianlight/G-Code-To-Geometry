@@ -32,7 +32,7 @@ export interface CNCSettings {
  * @param {ParsedCommand} parsedCommand - The parsed command.
  * @param {Settings} settings - The modularity settings.
  * @return {StraightLine} An instance of the StraightLine class.
- */
+ *
 export function StraightLine(index, start, end, parsedCommand, settings) {
     "use strict";
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -46,7 +46,7 @@ export function StraightLine(index, start, end, parsedCommand, settings) {
      * @memberof util.StraightLine
      * @instance
      * @return {Line} The line object.
-     */
+     *
     that.returnLine = function() {
         return {
             lineNumber : that.index,
@@ -64,7 +64,7 @@ export function StraightLine(index, start, end, parsedCommand, settings) {
      * @memberof util.StraightLine
      * @instance
      * @return {Size} The size.
-     */
+     *
     that.getSize = function() {
         return {
             min : {
@@ -108,7 +108,7 @@ export function StraightLine(index, start, end, parsedCommand, settings) {
  * @param {Settings} settings - The modularity settings.
  * @return {CurvedLine} An instance of the CurvedLine class.
  */
-export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition, parsedCommand:G3Commands, settings:CNCSettings){
+export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition, parsedCommand:G3Commands, settings:CNCSettings): void {
     "use strict";
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;

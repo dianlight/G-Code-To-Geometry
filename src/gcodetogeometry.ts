@@ -5,16 +5,8 @@ import { gcodeParser } from './antlr/gcodeParser'
 import { ANTLRErrorListener, CharStreams, CommonTokenStream, ConsoleErrorListener, RecognitionException, Recognizer } from 'antlr4ts'
 import { InterpreterVisitor } from './InterpreterVisitor'
 import { JSONError, JSONGeometry } from './JSONGeometry';
-import util from './util'
-
-//const util = require("./util");
-import { StraightLine, CurvedLine } from './lines'
-//var StraightLine = require("./lines").StraightLine;
-//var CurvedLine = require("./lines").CurvedLine;
-//const GParser = require("./parser").GParser;
-
-
-
+//import util from './util'
+//import { StraightLine, CurvedLine } from './lines'
 
 /**
  * Parses the GCode into a series of lines and curves and checks if errors.
@@ -22,27 +14,27 @@ import { StraightLine, CurvedLine } from './lines'
  * @param {string} code - The GCode.
  * @returns {ParsedGCode} The parsed GCode.
  */
-export function parse(code): JSONGeometry {
+export function parse(code:string): JSONGeometry {
     "use strict";
 
-    let unitIsSet = false;
-    let setInInch = true;
+    // let unitIsSet = false;
+    // let setInInch = true;
 
     /**
      * Removes the comments and spaces.
      * @param  {string}  command  The command to parse
      * @return  {string}  The command without the commands and spaces.
-     */
+     * /
     function removeCommentsAndSpaces(command) {
         const s = command.split('(')[0].split(';')[0]; //No need to use regex
         return s.split(/\s/).join('').trim();
-    }
+    }*/
 
     /**
      * Parses the result of GParser.parse.
      * @param  {array}  Result of GParser.parse
      * @return  {array}  Array of object.
-     */
+     * /
     function parseParsedGCode(parsed) {
         let obj = {};
         let i = 0;
@@ -70,6 +62,7 @@ export function parse(code): JSONGeometry {
         tab.push(obj);
         return tab;
     }
+    */
 
     /**
      * Checks if there is a wrong parameter.
@@ -77,7 +70,7 @@ export function parse(code): JSONGeometry {
      *                                      not include the type of the command)
      * @param  {array}  parameters          The current given parameters
      * @return  {bool}  True if there is a wrong parameter.
-     */
+     * /
     function checkWrongParameter(acceptedParameters, parameters) {
         let i = 0,
             j = 0;
@@ -103,7 +96,7 @@ export function parse(code): JSONGeometry {
      * Checks and modifies the total size.
      * @param  {object}  totalSize  The the whole operation size (modified)
      * @param  {object}  size       The added operation size
-     */
+     * /
     function checkTotalSize(totalSize, size) {
         const keys = ["x", "y", "z"];
         let i = 0;
@@ -124,7 +117,7 @@ export function parse(code): JSONGeometry {
      * @param {string} message The message.
      * @param {boolean} isSkipped If the command is skipped.
      * @return {Error} The error object.
-     */
+     * /
     function createError(line, message, isSkipped) {
         return { line: line, message: message, isSkipped: isSkipped };
     }
@@ -137,7 +130,7 @@ export function parse(code): JSONGeometry {
      * @param  {object}  settings   The modularity settings
      * @return {bool}  True if the command is skipped (error), else false if the
      *                 feedrate is correct or emits only a warning
-     */
+     * /
     function checkErrorFeedrate(command, errorList, line, settings) {
         const c = command;
         const consideredFeedrate = (c.f === undefined) ? settings.feedrate : c.f;
@@ -175,7 +168,7 @@ export function parse(code): JSONGeometry {
      * @param  {object}  parsedCommand        The command (is modified)
      * @param  {string}  previousMoveCommand  The type of the previous move
      *                                        command
-     */
+     * /
     function setGoodType(parsedCommand, previousMoveCommand) {
         if (parsedCommand.type !== undefined) {
             return;
@@ -195,7 +188,7 @@ export function parse(code): JSONGeometry {
      * point.
      * @param {boolean} inMm If the values are in inches.
      * @return {object} The point.
-     */
+     * /
     function findPosition(start, parameters, relative, inMm) {
         const pos = { x: start.x, y: start.y, z: start.z };
         const d = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
@@ -218,7 +211,7 @@ export function parse(code): JSONGeometry {
      * @param  {array}   errorList  The error list
      * @param  {number}  line       The line number
      * @return  {bool}   Returns true if the command is done, false if skipped
-     */
+     * /
     function checkG0(command, errorList, line) {
         const acceptedParameters = ["X", "Y", "Z"];
         const parameters = Object.keys(command);
@@ -239,7 +232,7 @@ export function parse(code): JSONGeometry {
      * @param  {number}  line              The line number
      * @param  {number}  previousFeedrate  The previous feedrate
      * @return  {bool}   Returns true if the command is done, false if skipped
-     */
+     * /
     function checkG1(command, errorList, line, previousFeedrate) {
         const acceptedParameters = ["X", "Y", "Z", "F"];
         const parameters = Object.keys(command);
@@ -261,7 +254,7 @@ export function parse(code): JSONGeometry {
      * @param  {number}  line              The line number
      * @param  {number}  previousFeedrate  The previous feedrate
      * @return  {bool}   Returns true if the command is done, false if skipped
-     */
+     * /
     function checkG2G3(command, errorList, line, previousFeedrate) {
         const acceptedParameters = ["X", "Y", "Z", "F", "I", "J", "K", "R"];
         const parameters = Object.keys(command);
@@ -302,7 +295,7 @@ export function parse(code): JSONGeometry {
      * @param  {array}   lines      The array containing the lines
      * @param  {number}  lineNumber The line number
      * @param  {object}  errorList  The error list
-     */
+     * /
     function manageG0G1(command, settings, lineNumber, lines, totalSize) {
         const nextPosition = findPosition(settings.position, command,
             settings.relative, settings.inMm);
@@ -325,7 +318,7 @@ export function parse(code): JSONGeometry {
      * @param  {array}   lines      The array containing the lines
      * @param  {object}  totalSize  The the whole operation size (modified)
      * @param  {object}  errorList  The error list
-     */
+     * /
     function manageG2G3(command, settings, lineNumber, lines, totalSize,
         errorList) {
         const nextPosition = findPosition(settings.position, command,
@@ -363,7 +356,7 @@ export function parse(code): JSONGeometry {
      * @param  {object}  totalSize  The the whole operation size (modified)
      * @param  {object}  errorList  The error list
      * @return {bool}  Returns true if have to continue, else false
-     */
+     * /
     function manageCommand(command, settings, lineNumber, lines, totalSize,
         errorList) {
         //Empty line
@@ -416,18 +409,22 @@ export function parse(code): JSONGeometry {
 
         return true;
     }
+    */
 
+    /*
     const totalSize = {
         min: { x: 0, y: 0, z: 0 },
         max: { x: 0, y: 0, z: 0 }
     };
-    const i = 0,
-        j = 0;
-    const tabRes = [];
-    const parsing = true;
-    const lines = [];
-    const errorList = [];
+    */
+   // const i = 0,
+   //     j = 0;
+   // const tabRes = [];
+   // const parsing = true;
+   // const lines = [];
+   // const errorList = [];
 
+    /*
     const settings = {
         feedrate: 0,
         previousMoveCommand: "",
@@ -446,7 +443,7 @@ export function parse(code): JSONGeometry {
             errorList: [{ isSkipped: false, line: 0, message: "(error) No command." }]
         };
     }
-
+    */
 
 
     // Create the lexer and parser
@@ -456,7 +453,8 @@ export function parse(code): JSONGeometry {
     const lexer = new gcodeLexer(inputStream);
     lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
     lexer.addErrorListener({
-        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
             parserError.push({
                 isSkipped: true,
                 line,
@@ -468,7 +466,8 @@ export function parse(code): JSONGeometry {
     const parser = new gcodeParser(tokenStream);
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
     parser.addErrorListener({
-        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+        syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
             parserError.push({
                 isSkipped: true,
                 line,

@@ -1,4 +1,4 @@
-import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, GContext, GWordContext, IContext, JContext, LineContext, ProgramContext, RContext, SegmentContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
+import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, IContext, JContext, LineContext, ProgramContext, RContext, SegmentContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
 import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor"
 import { gcodeVisitor } from "./antlr/gcodeVisitor"
 import { JSONGeometry, JSONGeometryLine, JSONPosition } from "./JSONGeometry";
@@ -550,7 +550,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG0(ctx: G0Context): JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG0(_ctx: G0Context): JSONGeometry {
     // console.log('\tG0')
     this.currentLine.start = this.shallow(this.position)
     this.currentLine.end = this.shallow(this.position)
@@ -564,7 +565,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
-    visitG1(ctx: G1Context): JSONGeometry {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    visitG1(_ctx: G1Context): JSONGeometry {
         // console.log('\tG1',this.position)
         this.currentLine.start = this.shallow(this.position)
         this.currentLine.end =  this.shallow(this.position)
@@ -578,7 +580,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG2(ctx: G2Context):JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG2(_ctx: G2Context):JSONGeometry {
     // console.log('\tG2')
      this.currentLine.type = 'G2'
      this.currentLine.start = this.shallow(this.position)
@@ -591,7 +594,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG3(ctx: G3Context):JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG3(_ctx: G3Context):JSONGeometry {
     // console.log('\tG3')
     this.currentLine.type = 'G3'
     this.currentLine.start = this.shallow(this.position)
@@ -619,7 +623,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
-    visitG17(ctx: G17Context): JSONGeometry {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    visitG17(_ctx: G17Context): JSONGeometry {
         this.settings.crossAxe = 'z';
      return
  }
@@ -629,7 +634,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG18(ctx: G18Context): JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG18(_ctx: G18Context): JSONGeometry {
     this.settings.crossAxe = 'y';
  return
 }
@@ -639,7 +645,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG19(ctx: G19Context): JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG19(_ctx: G19Context): JSONGeometry {
     this.settings.crossAxe = 'x';
  return
 }
@@ -649,7 +656,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG20(ctx: G20Context): JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG20(_ctx: G20Context): JSONGeometry {
     this.settings.inMm = false;
  return
 }
@@ -659,7 +667,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * @param ctx the parse tree
   * @return the visitor result
   */
- visitG21(ctx: G21Context): JSONGeometry {
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+ visitG21(_ctx: G21Context): JSONGeometry {
     this.settings.inMm = true;
  return
 }

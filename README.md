@@ -1,10 +1,11 @@
 # Fork Note
 
-This form is wip to mantain and evolve the progect and port to 2.0.0 version
+This form is wip to maintain and evolve the project and port to 2.0.0 version
 - [x] Port to Typescript and expose d.ts
 - [x] Use ANTLR4 to parse GCODE file
 - [x] Use JEST to check compatibility
-- [ ] Accept a Strem data as imput ( for large GCODE files)
+- [ ] Support relative positioning
+- [ ] Accept a Strem data as input ( for large GCODE files)
 - [ ] Accept an Event Base output ( for large Geometry output )
 - [ ] Clean unused code
 
