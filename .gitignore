@@ -1,5 +1,4 @@
 Makefile
 out
-dist
 node_modules
 webpack.config.js
