@@ -144,9 +144,9 @@ FLOAT_PRECISION = 0.001;
  * @param {number} inMm - If the feedrate is in millimeters.
  * Returns the feedrate in inches.
  */
-calculateFeedrate = function(feedrate, inMm) {
+calculateFeedrate(feedrate:number, inMm:boolean):number {
     return (inMm === false) ? feedrate : feedrate * this.MILLIMETER_TO_INCH;
-};
+}
 
 /**
  * Checks if two numbers are nearly equal. This function is used to avoid
@@ -159,10 +159,10 @@ calculateFeedrate = function(feedrate, inMm) {
  * of the comparaison.
  * @return {boolean} True if the two values are nearly equal.
  */
-nearlyEqual = function(a:number, b:number, precision?:number) {
+nearlyEqual(a:number, b:number, precision?:number):boolean {
     const p = (precision === undefined) ? this.FLOAT_PRECISION : precision;
     return Math.abs(b - a) <= p;
-};
+}
 
 /**
  * Swaps two objects. It has to be the same objects, too bad if it's not.
@@ -170,7 +170,7 @@ nearlyEqual = function(a:number, b:number, precision?:number) {
  * @param {object} obj1 - The first object.
  * @param {object} obj2 - The second object.
 */
-swapObjects = function(obj1, obj2) {
+swapObjects(obj1, obj2) {
     function swapSingleField(objA, objB, key) {
         const temp = objA[key];
         objA[key] = objB[key];
@@ -186,7 +186,7 @@ swapObjects = function(obj1, obj2) {
             swapSingleField(obj1, obj2, keys[i]);
         }
     }
-};
+}
 
 /**
  * Returns the copy of the object.
@@ -194,7 +194,7 @@ swapObjects = function(obj1, obj2) {
  * @param {object} object - The object.
  * @return {object} The copy of the object.
 */
-copyObject = function(object) {
+copyObject(object) {
     const keys = Object.keys(object);
     let i = 0;
     const copy = {};
@@ -206,7 +206,7 @@ copyObject = function(object) {
         }
     }
     return copy;
-};
+}
 
 /**
  * Moves the point according to the vector.
@@ -214,7 +214,7 @@ copyObject = function(object) {
  * @param {Point} point - The point to move.
  * @param {Point} vector - The vector.
  */
-movePoint = function(point, vector) {
+movePoint(point, vector) {
     const keys = Object.keys(vector);
     let i = 0;
     for(i = 0; i < keys.length; i++) {
@@ -222,7 +222,7 @@ movePoint = function(point, vector) {
             point[keys[i]] += vector[keys[i]];
         }
     }
-};
+}
 
 /**
  * Does a 2D dot product.
@@ -231,9 +231,9 @@ movePoint = function(point, vector) {
  * @param {Point} v2 - The second vector.
  * @return {number} The result.
  */
-dotProduct2 = function(v1, v2) {
+dotProduct2(v1, v2) {
     return v1.x * v2.x + v1.y * v2.y;
-};
+}
 
 /**
  * Does a 2D cross product.
@@ -242,9 +242,9 @@ dotProduct2 = function(v1, v2) {
  * @param {Point} v2 - The second vector.
  * @return {number} The result on the Z axis.
  */
-crossProduct2 = function(v1, v2) {
+crossProduct2(v1, v2) {
     return v1.x * v2.y - v2.x * v1.y;
-};
+}
 
 /**
  * Calculates the length of a 3D vector.
@@ -252,9 +252,9 @@ crossProduct2 = function(v1, v2) {
  * @param {Point} v - The vector.
  * @return {number} The vector length.
  */
-lengthVector3 = function(v) {
+lengthVector3(v) {
     return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-};
+}
 
 /**
  * Returns object of 3 axes:
@@ -267,7 +267,7 @@ lengthVector3 = function(v) {
  * not "x" or "y".
  * @return {Axes} The object defining the real, imaginary and cross axis.
  */
-findAxes = function(crossAxe) {
+findAxes(crossAxe) {
     if(crossAxe.toLowerCase() === "x") {
         return { re : "y", im : "z", cr : "x"};
     }
@@ -275,7 +275,7 @@ findAxes = function(crossAxe) {
         return { re : "z", im : "x", cr : "y"};
     }
     return { re : "x", im : "y", cr : "z"};
-};
+}
 
 /**
  * Does a rotation and scale of point according to center. Stores the result in
@@ -289,7 +289,7 @@ findAxes = function(crossAxe) {
  * @param {string} re - The real axis.
  * @param {string} im - The imaginary axis.
  */
-scaleAndRotation = function(
+scaleAndRotation(
     center, point, newPoint, angle, length, re, im
 ) {
     const c = center, p = point, nP = newPoint;
@@ -298,7 +298,7 @@ scaleAndRotation = function(
 
     nP[re] = l * ((pRe - cRe) * cA - (pIm - cIm) * sA) + cRe;
     nP[im] = l * ((pIm - cIm) * cA + (pRe - cRe) * sA) + cIm;
-};
+}
 
 /**
  * Returns the signed angle in radian in 2D (between -PI and PI).
@@ -307,7 +307,7 @@ scaleAndRotation = function(
  * @param {Point} v2 - The second vector.
  * @return {number} The angle in radian.
  */
-findAngleVectors2 = function(v1, v2) {
+findAngleVectors2(v1, v2) {
     const sign = (this.crossProduct2(v1, v2) < 0) ? -1 : 1;
     const dot = this.dotProduct2(v1, v2);
     const lV1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
@@ -318,7 +318,7 @@ findAngleVectors2 = function(v1, v2) {
     }
 
     return sign * Math.acos(dot / (lV1 * lV2));
-};
+}
 
 /**
  * Returns the signed angle in radian in 2d (between -2pi and 2pi).
@@ -328,7 +328,7 @@ findAngleVectors2 = function(v1, v2) {
  * @param {boolean} positive - If the oriented angle goes counter-clockwise.
  * @return {number} The angle in radian.
  */
-findAngleOrientedVectors2 = function(v1, v2, positive) {
+findAngleOrientedVectors2 (v1, v2, positive) {
     const angle =  this.findAngleVectors2(v1, v2);
 
     if(positive === false && angle > 0) {
@@ -339,7 +339,7 @@ findAngleOrientedVectors2 = function(v1, v2, positive) {
     }
 
     return angle;
-};
+}
 
 /**
  * Checks if the value is include between the value a (include) and b (include).
@@ -350,9 +350,9 @@ findAngleOrientedVectors2 = function(v1, v2, positive) {
  * @param {number} b - The second boundary.
  * @return {boolean} The result.
  */
-isInclude = function(value, a, b) {
+isInclude(value, a, b) {
     return (b < a) ? (b <= value && value <= a) : (a <= value && value <= b);
-};
+}
 
 //const keys = Object.keys(util);
 //let i = 0;

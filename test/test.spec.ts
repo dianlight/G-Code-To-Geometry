@@ -1,5 +1,3 @@
-//const { expect } = require("@jest/globals");
-import G from "glob"
 import * as GCodeToGeometry from "../src/gcodetogeometry"
 import fs from 'fs'
 import path from 'path'
