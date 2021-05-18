@@ -36,6 +36,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
 
     position: JSONPosition = { x: 0, y: 0, z: 0 }
     
+    // eslint-disable-next-line @typescript-eslint/ban-types
     shallow<T extends object>(source: T): T {
         return {
           ...source,
@@ -54,7 +55,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                 this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine);
                 return this.currentLine.type
             case 'G2':
-            case 'G3':
+            case 'G3': {
 
                 const curvedline = new CurvedLine(this.currentLine.lineNumber,
                     this.currentLine.start as JSONPosition,
@@ -63,7 +64,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                 
                 //console.log("------------------------", curvedline);
                 if (curvedline.center !== false) {
-                    var temp = curvedline.returnLine();
+                    const temp = curvedline.returnLine();
                     if (temp === false) {
                         this.geometry.errorList.push({
                             line: this.currentLine.lineNumber, message: "(error) Impossible to create arc.", isSkipped: true
@@ -71,11 +72,11 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                     } else {
                         this.geometry.lines.push(temp);
                         // console.log("-----TM-------------------\n", JSON.stringify(temp,null,2));
-                     //   settings.feedrate = line.feedrate;
-                     //   settings.previousMoveCommand = command.type;
-                     //   checkTotalSize(totalSize, line.getSize());
-                      //  lines.push(temp);
-                      //  settings.position = util.copyObject(line.end);
+                        //   settings.feedrate = line.feedrate;
+                        //   settings.previousMoveCommand = command.type;
+                        //   checkTotalSize(totalSize, line.getSize());
+                        //  lines.push(temp);
+                        //  settings.position = util.copyObject(line.end);
                     }
                     
                 } else {
@@ -86,6 +87,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                     })
                 }
                 return this.currentLine.type
+            }
             default:
                 if(this.currentLine.lineNumber)
                     this.geometry.errorList.push({
@@ -107,7 +109,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         ctx.children?.forEach(ctxx => this.visit(ctxx))
         this.emitCurrentLine()
         return this.geometry
-    };
+    }
 
 
  /**
@@ -555,7 +557,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
     this.currentLine.type = 'G0'
     this.currentLine.feedrate = 0
     return this.geometry
-};
+}
 
  /**
   * Visit a parse tree produced by `gcodeParser.g1`.
@@ -630,7 +632,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
  visitG18(ctx: G18Context): JSONGeometry {
     this.settings.crossAxe = 'y';
  return
-};
+}
 
  /**
   * Visit a parse tree produced by `gcodeParser.g19`.
@@ -640,7 +642,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
  visitG19(ctx: G19Context): JSONGeometry {
     this.settings.crossAxe = 'x';
  return
-};
+}
 
  /**
   * Visit a parse tree produced by `gcodeParser.g20`.
@@ -650,7 +652,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
  visitG20(ctx: G20Context): JSONGeometry {
     this.settings.inMm = false;
  return
-};
+}
 
  /**
   * Visit a parse tree produced by `gcodeParser.g21`.
@@ -660,7 +662,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
  visitG21(ctx: G21Context): JSONGeometry {
     this.settings.inMm = true;
  return
-};
+}
  /**
   * Visit a parse tree produced by `gcodeParser.g28`.
   * @param ctx the parse tree

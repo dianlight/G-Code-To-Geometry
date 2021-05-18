@@ -1,6 +1,6 @@
 {
-    "name": "g-code-to-geometry",
-    "version": "1.0.0",
+    "name": "gcodetogeometry",
+    "version": "2.0.0",
     "description": "Parse GCode into geometrical lines and curves.",
     "main": "test/test.js",
     "module": "dist/gcodetogeometry.js",
@@ -10,7 +10,7 @@
         "build": "webpack --config webpack.config.js",
         "serve": "webpack serve --mode=development --config webpack.config.js",
         "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4",
-        "postinstall": "npm build"
+        "postinstall": "npm run build"
     },
     "repository": {
         "type": "git",
@@ -32,8 +32,11 @@
     "devDependencies": {
         "@babel/preset-typescript": "^7.13.0",
         "@types/jest": "^26.0.23",
+        "@typescript-eslint/eslint-plugin": "^4.24.0",
+        "@typescript-eslint/parser": "^4.24.0",
         "antlr4ts": "^0.5.0-alpha.4",
         "antlr4ts-cli": "^0.5.0-alpha.4",
+        "eslint": "^7.26.0",
         "jest": "^26.6.3",
         "node-polyfill-webpack-plugin": "^1.1.2",
         "ts-jest": "^26.5.6",

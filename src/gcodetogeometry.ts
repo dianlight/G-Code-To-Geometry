@@ -4,13 +4,14 @@ import { gcodeLexer } from './antlr/gcodeLexer'
 import { gcodeParser } from './antlr/gcodeParser'
 import { ANTLRErrorListener, CharStreams, CommonTokenStream, ConsoleErrorListener, RecognitionException, Recognizer } from 'antlr4ts'
 import { InterpreterVisitor } from './InterpreterVisitor'
-import { JSONError } from 'JSONGeometry';
+import { JSONError, JSONGeometry } from './JSONGeometry';
+import util from './util'
 
-
-var util = require("./util");
-var StraightLine = require("./lines").StraightLine;
-var CurvedLine = require("./lines").CurvedLine;
-var GParser = require("./parser").GParser;
+//const util = require("./util");
+import { StraightLine, CurvedLine } from './lines'
+//var StraightLine = require("./lines").StraightLine;
+//var CurvedLine = require("./lines").CurvedLine;
+//const GParser = require("./parser").GParser;
 
 
 
@@ -21,11 +22,11 @@ var GParser = require("./parser").GParser;
  * @param {string} code - The GCode.
  * @returns {ParsedGCode} The parsed GCode.
  */
-export function parse(code) {
+export function parse(code): JSONGeometry {
     "use strict";
 
-    var unitIsSet = false;
-    var setInInch = true;
+    let unitIsSet = false;
+    let setInInch = true;
 
     /**
      * Removes the comments and spaces.
@@ -33,7 +34,7 @@ export function parse(code) {
      * @return  {string}  The command without the commands and spaces.
      */
     function removeCommentsAndSpaces(command) {
-        var s = command.split('(')[0].split(';')[0]; //No need to use regex
+        const s = command.split('(')[0].split(';')[0]; //No need to use regex
         return s.split(/\s/).join('').trim();
     }
 
@@ -43,12 +44,12 @@ export function parse(code) {
      * @return  {array}  Array of object.
      */
     function parseParsedGCode(parsed) {
-        var obj = {};
-        var i = 0;
-        var letter = "",
+        let obj = {};
+        let i = 0;
+        let letter = "",
             number = "";
-        var tab = [];
-        var emptyObj = true;
+        const tab = [];
+        let emptyObj = true;
 
         for (i = 0; i < parsed.words.length; i++) {
             letter = parsed.words[i][0];
@@ -78,9 +79,9 @@ export function parse(code) {
      * @return  {bool}  True if there is a wrong parameter.
      */
     function checkWrongParameter(acceptedParameters, parameters) {
-        var i = 0,
+        let i = 0,
             j = 0;
-        var accepted = true;
+        let accepted = true;
 
         for (j = parameters.length - 1; j >= 0; j--) {
             for (i = acceptedParameters.length - 1; i >= 0; i--) {
@@ -104,8 +105,8 @@ export function parse(code) {
      * @param  {object}  size       The added operation size
      */
     function checkTotalSize(totalSize, size) {
-        var keys = ["x", "y", "z"];
-        var i = 0;
+        const keys = ["x", "y", "z"];
+        let i = 0;
         for (i = keys.length - 1; i >= 0; i--) {
             if (totalSize.min[keys[i]] > size.min[keys[i]]) {
                 totalSize.min[keys[i]] = size.min[keys[i]];
@@ -138,8 +139,8 @@ export function parse(code) {
      *                 feedrate is correct or emits only a warning
      */
     function checkErrorFeedrate(command, errorList, line, settings) {
-        var c = command;
-        var consideredFeedrate = (c.f === undefined) ? settings.feedrate : c.f;
+        const c = command;
+        const consideredFeedrate = (c.f === undefined) ? settings.feedrate : c.f;
 
         if (c.type !== undefined && c.type !== "G1" && c.type !== "G2" &&
             c.type !== "G3") {
@@ -196,8 +197,8 @@ export function parse(code) {
      * @return {object} The point.
      */
     function findPosition(start, parameters, relative, inMm) {
-        var pos = { x: start.x, y: start.y, z: start.z };
-        var d = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
+        const pos = { x: start.x, y: start.y, z: start.z };
+        const d = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
         if (relative === true) {
             if (parameters.x !== undefined) { pos.x += parameters.x * d; }
             if (parameters.y !== undefined) { pos.y += parameters.y * d; }
@@ -219,8 +220,8 @@ export function parse(code) {
      * @return  {bool}   Returns true if the command is done, false if skipped
      */
     function checkG0(command, errorList, line) {
-        var acceptedParameters = ["X", "Y", "Z"];
-        var parameters = Object.keys(command);
+        const acceptedParameters = ["X", "Y", "Z"];
+        const parameters = Object.keys(command);
         parameters.splice(parameters.indexOf("type"), 1);
 
         if (checkWrongParameter(acceptedParameters, parameters) === true) {
@@ -240,8 +241,8 @@ export function parse(code) {
      * @return  {bool}   Returns true if the command is done, false if skipped
      */
     function checkG1(command, errorList, line, previousFeedrate) {
-        var acceptedParameters = ["X", "Y", "Z", "F"];
-        var parameters = Object.keys(command);
+        const acceptedParameters = ["X", "Y", "Z", "F"];
+        const parameters = Object.keys(command);
         parameters.splice(parameters.indexOf("type"), 1);
 
         if (checkWrongParameter(acceptedParameters, parameters) === true) {
@@ -262,8 +263,8 @@ export function parse(code) {
      * @return  {bool}   Returns true if the command is done, false if skipped
      */
     function checkG2G3(command, errorList, line, previousFeedrate) {
-        var acceptedParameters = ["X", "Y", "Z", "F", "I", "J", "K", "R"];
-        var parameters = Object.keys(command);
+        const acceptedParameters = ["X", "Y", "Z", "F", "I", "J", "K", "R"];
+        const parameters = Object.keys(command);
         parameters.splice(parameters.indexOf("type"), 1);
 
         if (checkWrongParameter(acceptedParameters, parameters) === true) {
@@ -303,9 +304,9 @@ export function parse(code) {
      * @param  {object}  errorList  The error list
      */
     function manageG0G1(command, settings, lineNumber, lines, totalSize) {
-        var nextPosition = findPosition(settings.position, command,
+        const nextPosition = findPosition(settings.position, command,
             settings.relative, settings.inMm);
-        var line = new StraightLine(lineNumber,
+        const line = new StraightLine(lineNumber,
             settings.position, nextPosition, command, settings);
         settings.previousMoveCommand = command.type;
         checkTotalSize(totalSize, line.getSize());
@@ -327,12 +328,12 @@ export function parse(code) {
      */
     function manageG2G3(command, settings, lineNumber, lines, totalSize,
         errorList) {
-        var nextPosition = findPosition(settings.position, command,
+        const nextPosition = findPosition(settings.position, command,
             settings.relative, settings.inMm);
-        var line = new CurvedLine(lineNumber, settings.position,
+        const line = new CurvedLine(lineNumber, settings.position,
             nextPosition, command, settings);
         if (line.center !== false) {
-            var temp = line.returnLine();
+            const temp = line.returnLine();
             if (temp === false) {
                 errorList.push(createError(
                     lineNumber, "(error) Impossible to create arc.", true
@@ -416,18 +417,18 @@ export function parse(code) {
         return true;
     }
 
-    var totalSize = {
+    const totalSize = {
         min: { x: 0, y: 0, z: 0 },
         max: { x: 0, y: 0, z: 0 }
     };
-    var i = 0,
+    const i = 0,
         j = 0;
-    var tabRes = [];
-    var parsing = true;
-    var lines = [];
-    var errorList = [];
+    const tabRes = [];
+    const parsing = true;
+    const lines = [];
+    const errorList = [];
 
-    var settings = {
+    const settings = {
         feedrate: 0,
         previousMoveCommand: "",
         crossAxe: "z",
@@ -442,7 +443,7 @@ export function parse(code) {
             lines: [],
             size: totalSize,
             displayInInch: setInInch,
-            errorList: [{ line: 0, message: "(error) No command." }]
+            errorList: [{ isSkipped: false, line: 0, message: "(error) No command." }]
         };
     }
 
@@ -451,8 +452,8 @@ export function parse(code) {
     // Create the lexer and parser
     const parserError: JSONError[] = []
 
-    let inputStream = CharStreams.fromString(code + "\n");
-    let lexer = new gcodeLexer(inputStream);
+    const inputStream = CharStreams.fromString(code + "\n");
+    const lexer = new gcodeLexer(inputStream);
     lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
     lexer.addErrorListener({
         syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
@@ -463,8 +464,8 @@ export function parse(code) {
             })     
         }
     } as ANTLRErrorListener<number>)
-    let tokenStream = new CommonTokenStream(lexer);
-    let parser = new gcodeParser(tokenStream);
+    const tokenStream = new CommonTokenStream(lexer);
+    const parser = new gcodeParser(tokenStream);
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
     parser.addErrorListener({
         syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined) {
@@ -475,7 +476,7 @@ export function parse(code) {
             })     
         }
     } as ANTLRErrorListener<number>)
-    let tree = parser.program()
+    const tree = parser.program()
     
 /* */
     const interpreterVisitor = new InterpreterVisitor()
@@ -524,4 +525,4 @@ export function parse(code) {
         errorList: errorList
     };
   /*  */
-};
+}

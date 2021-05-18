@@ -10,7 +10,7 @@ describe("Test GCODE Partsing capability", () => {
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#1.json')).toString());
     //    console.log(code)
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
         //console.log(JSON.stringify(cresult,null,2));
         expect(cresult).toBeDefined();
         cresult.gcode = result.gcode = [];
@@ -21,7 +21,7 @@ describe("Test GCODE Partsing capability", () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#2.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#2.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
         expect(cresult).toBeDefined();
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
@@ -31,7 +31,7 @@ describe("Test GCODE Partsing capability", () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#3.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#3.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
         expect(cresult).toBeDefined();
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
@@ -54,7 +54,7 @@ describe("Test GCODE Partsing capability", () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#6.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#6.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
     //    fs.writeFileSync(path.join(__dirname, 'case#6.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
@@ -66,7 +66,7 @@ describe("Test GCODE Partsing capability", () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#7.gcode')).toString();
         const result = fs.readFileSync(path.join(__dirname, 'case#7.json')).toString();
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
 //        fs.writeFileSync(path.join(__dirname, 'case#7.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(JSON.stringify(cresult, null, 2)).toEqual(result);
@@ -78,7 +78,7 @@ describe("Test GCODE Partsing capability", () => {
         const code = fs.readFileSync(path.join(__dirname, 'case#8.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#8.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
+        const cresult = GCodeToGeometry.parse(code);
 //        fs.writeFileSync(path.join(__dirname, 'case#8.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);

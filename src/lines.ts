@@ -1,11 +1,8 @@
 /*jslint todo: true, continue: true, white: true*/
 
 import { JSONPosition } from "./JSONGeometry";
-
+import util from "./util"
 // Written by Alex Canales for ShopBotTools, Inc.
-
-var util = require("./util");
-
 export interface G3Commands {
     r?: number,
     i?: number,
@@ -38,7 +35,8 @@ export interface CNCSettings {
  */
 export function StraightLine(index, start, end, parsedCommand, settings) {
     "use strict";
-    var that = this;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
 
     /**
      * Returns a line object of type "G0" or "G1" (corresponding to
@@ -97,7 +95,7 @@ export function StraightLine(index, start, end, parsedCommand, settings) {
     }
 
     initialize(index, start, parsedCommand, settings);
-};
+}
 
 /**
  * Creates an instance of the CurvedLine class. This class does the computations
@@ -112,14 +110,15 @@ export function StraightLine(index, start, end, parsedCommand, settings) {
  */
 export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition, parsedCommand:G3Commands, settings:CNCSettings){
     "use strict";
-    var that = this;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
 
     // Will give 0 if start and end are the same
     function getBezierAngle() {
-        var axes = util.findAxes(that.crossAxe);
-        var cs = { x : that.start[axes.re] - that.center[axes.re],
+        const axes = util.findAxes(that.crossAxe);
+        const cs = { x : that.start[axes.re] - that.center[axes.re],
             y : that.start[axes.im] - that.center[axes.im], z : 0};
-        var ce = { x : that.end[axes.re] - that.center[axes.re],
+        const ce = { x : that.end[axes.re] - that.center[axes.re],
             y : that.end[axes.im] - that.center[axes.im], z : 0};
 
         return util.findAngleOrientedVectors2(cs, ce,
@@ -127,8 +126,8 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
     }
 
     function getBezierRadius() {
-        var axes = util.findAxes(that.crossAxe);
-        var cs = { x : that.start[axes.re] - that.center[axes.re],
+        const axes = util.findAxes(that.crossAxe);
+        const cs = { x : that.start[axes.re] - that.center[axes.re],
             y : that.start[axes.im] - that.center[axes.im], z : 0};
         return util.lengthVector3(cs);
     }
@@ -138,7 +137,7 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
     //radius > 0
     //From Richard A DeVeneza's work
     function cubBez2DInt(angle, radius) {
-        var p0: Partial<JSONPosition> = {}, p1: Partial<JSONPosition> = {}, p2: Partial<JSONPosition> ={}, p3: Partial<JSONPosition> = {};
+        let p0: Partial<JSONPosition> = {}, p1: Partial<JSONPosition> = {}, p2: Partial<JSONPosition> ={}, p3: Partial<JSONPosition> = {};
         angle = Math.abs(angle);
         if(angle === Math.PI / 2) {
             //cos(PI/4) == sin(PI/4) but JavaScript doesn't believe it
@@ -167,7 +166,7 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
     // clockwise is bool
     // pitch can be positive or negative
     function cubBez2DTo3D(curve, clockwise, pitch, crossAxe) {
-        var height = 0;  //height position for p1, p2 and p3
+        let height = 0;  //height position for p1, p2 and p3
 
         if(clockwise === false) {
             util.swapObjects(curve.p0, curve.p3);
@@ -215,7 +214,7 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
     }
 
     function rotAndPlaBez(curve, center, angle, re, im) {
-        var c = { x : 0, y : 0, z : 0 };
+        const c = { x : 0, y : 0, z : 0 };
         util.scaleAndRotation(c,curve.p0,curve.p0, angle, 1, re, im);
         util.scaleAndRotation(c,curve.p1,curve.p1, angle, 1, re, im);
         util.scaleAndRotation(c,curve.p2,curve.p2, angle, 1, re, im);
@@ -229,12 +228,13 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
 
     // The Bézier's curve must be on the good plane
     function getFullBezier(num90, bez90, numSmall, bezSmall, pitch90) {
-        var arcs = [];
-        var center = util.copyObject(that.center);
-        var axes = util.findAxes(that.crossAxe);
-        var cs = { x : that.start[axes.re] - center[axes.re],
+        const arcs = [];
+        const center = util.copyObject(that.center);
+        const axes = util.findAxes(that.crossAxe);
+        const cs = { x : that.start[axes.re] - center[axes.re],
             y : that.start[axes.im] - center[axes.im] };
-        var i = 0, angle = 0, sign = (that.clockwise === true) ? -1 : 1;
+        let i = 0, angle = 0
+        const sign = (that.clockwise === true) ? -1 : 1;
 
         if(num90 === 0 && numSmall === 0) {
             return arcs;
@@ -283,12 +283,12 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
 
     function arcToBezier() {
         // console.log('00000000000\n',that)
-        var num90 = 0, numSmall = 1;  //Number arc = pi/2 and arc < pi/2
-        var bez90 = {}, bezSmall = {};
-        var p90 = 0, pLittle = 0, pAngle = 0; //Pitch of the arcs
-        var angle = getBezierAngle();
-        var radius = getBezierRadius();
-        var absAngle = Math.abs(angle), halfPI = 1.570796326794897;
+        let num90 = 0, numSmall = 1;  //Number arc = pi/2 and arc < pi/2
+        let bez90 = {}, bezSmall = {};
+        let p90 = 0, pLittle = 0, pAngle = 0; //Pitch of the arcs
+        let angle = getBezierAngle();
+        const radius = getBezierRadius();
+        const absAngle = Math.abs(angle), halfPI = 1.570796326794897;
 
         if(angle === 0 || radius === 0) {
             return [];
@@ -326,16 +326,16 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
 
     //Cannot use arcToBezier because of calculus of oriented angle
     function circleToBezier() {
-        var bez90 = {};
-        var bezier = [];
-        var pitch = 0;
-        var halfPI = 1.570796326794897;
-        var sign = (that.clockwise === true) ? -1 : 1;
-        var rotAngle = sign * Math.PI * 2;
-        var radius = getBezierRadius();
-        var i = 0;
-        var center = util.copyObject(that.center);
-        var axes = util.findAxes(that.crossAxe);
+        let bez90 = {};
+        const bezier = [];
+        let pitch = 0;
+        const halfPI = 1.570796326794897;
+        const sign = (that.clockwise === true) ? -1 : 1;
+        let rotAngle = sign * Math.PI * 2;
+        const radius = getBezierRadius();
+        let i = 0;
+        const center = util.copyObject(that.center);
+        const axes = util.findAxes(that.crossAxe);
 
         if(radius === 0) {
             return [];
@@ -367,8 +367,8 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
      * @return {Line|boolean} False if impossible line else the line object.
      */
     that.returnLine = function() {
-        var bez = [];
-        var axes = util.findAxes(that.crossAxe);
+        let bez = [];
+        const axes = util.findAxes(that.crossAxe);
 
         if(that.start[axes.re] === that.end[axes.re] &&
                 that.start[axes.im] === that.end[axes.im]) {
@@ -400,12 +400,14 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
      * @return {object|boolean} The center point or false.
      */
     function findCenterWithRadius(start, end, radius, clockwise, crossAxe) {
-        var se = { x : end.x - start.x, y : end.y - start.y,
+        const se = { x : end.x - start.x, y : end.y - start.y,
             z : end.z - start.z
         };
-        var angle = 0, l = 1, lSE = 0, r = Math.abs(radius), aCSCE = 0;
-        var center = { x : 0, y : 0, z : 0 };
-        var axes = util.findAxes(crossAxe);
+        let angle = 0, l = 1, lSE = 0
+        const r = Math.abs(radius)
+        let aCSCE = 0;
+        const center = { x : 0, y : 0, z : 0 };
+        const axes = util.findAxes(crossAxe);
         lSE = Math.sqrt(se[axes.re] * se[axes.re] + se[axes.im] * se[axes.im]);
 
         if(lSE > Math.abs(radius * 2) || lSE === 0) {
@@ -442,10 +444,10 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
 
     //radius is positive or negative
     function findCenter(start: JSONPosition, end: JSONPosition, parsedCommand, clockwise, crossAxe, inMm) {
-        var delta = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
-        var center: JSONPosition | false = { x : start.x, y : start.y, z : start.z };
-        var distCenterStart, distCenterEnd;
-        var axes = util.findAxes(crossAxe);
+        const delta = (inMm === false) ? 1 : util.MILLIMETER_TO_INCH;
+        let center: JSONPosition | false = { x : start.x, y : start.y, z : start.z };
+        let distCenterStart, distCenterEnd;
+        const axes = util.findAxes(crossAxe);
 
         if(parsedCommand.r === undefined) {
             if(parsedCommand.i !== undefined) {
@@ -486,7 +488,7 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
 
     function axeCutArc(reValue, imValue, angleBezier, cs) {
         //Find the angle in the same orientation than the Bézier's angle
-        var a = util.findAngleOrientedVectors2(cs,
+        const a = util.findAngleOrientedVectors2(cs,
                 { x : reValue, y : imValue }, that.clockwise === false);
         return (util.isInclude(a, 0, angleBezier) === true);
     }
@@ -500,13 +502,13 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
      * @return {Size} The size.
      */
     that.getSize = function() {
-        var axes = util.findAxes(that.crossAxe);
-        var cs = {
+        const axes = util.findAxes(that.crossAxe);
+        const cs = {
             x : that.start[axes.re] - that.center[axes.re],
             y : that.start[axes.im] - that.center[axes.im]
         };
-        var radius = getBezierRadius(), aBez = getBezierAngle();
-        var min = { x : 0 , y : 0, z : 0 }, max = { x : 0 , y : 0, z : 0 };
+        const radius = getBezierRadius(), aBez = getBezierAngle();
+        const min = { x : 0 , y : 0, z : 0 }, max = { x : 0 , y : 0, z : 0 };
 
         // Is circle
         if(that.start[axes.re] === that.end[axes.re] &&
@@ -561,4 +563,4 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
     }
 
     initialize(index, start, parsedCommand, settings);
-};
+}
