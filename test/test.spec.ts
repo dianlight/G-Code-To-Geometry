@@ -1,6 +1,9 @@
 import * as GCodeToGeometry from "../src/gcodetogeometry"
 import fs from 'fs'
 import path from 'path'
+import * as jestEx from './jest.exutil'
+import os from 'os'
+
 
 describe("Test GCODE Partsing capability", () => {
     it('Parse Case#1 GCode - Small Test', () => {
@@ -8,9 +11,12 @@ describe("Test GCODE Partsing capability", () => {
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#1.json')).toString());
     //    console.log(code)
         expect(GCodeToGeometry.parse).toBeDefined();
+        const stmem = os.freemem();
         const cresult = GCodeToGeometry.parse(code);
         //console.log(JSON.stringify(cresult,null,2));
         expect(cresult).toBeDefined();
+        console.log(jestEx.roughSizeOfObject(cresult),code.length,stmem - os.freemem())
+//        expect(jestEx.roughSizeOfObject(cresult)).toBeLessThan(stmem - os.freemem())
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
     })

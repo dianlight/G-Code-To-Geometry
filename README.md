@@ -6,7 +6,7 @@ This form is wip to maintain and evolve the project and port to 2.0.0 version
 - [x] Use JEST to check compatibility
 - [ ] Support relative positioning
 - [ ] Accept a Strem data as input ( for large GCODE files)
-- [ ] Accept an Event Base output ( for large Geometry output )
+- [ ] Accept an Event Base output - Pull Parser - ( for large Geometry output )
 - [ ] Clean unused code
 
 # Handibot-GCode-To-Geometry
