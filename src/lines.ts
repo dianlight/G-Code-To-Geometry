@@ -1,6 +1,6 @@
 /*jslint todo: true, continue: true, white: true*/
 
-import { JSONPosition } from "./JSONGeometry";
+import { JSONGeometryLine, JSONPosition } from "./JSONGeometry";
 import util from "./util"
 // Written by Alex Canales for ShopBotTools, Inc.
 export interface G3Commands {
@@ -366,7 +366,7 @@ export function CurvedLine(index:number, start: JSONPosition, end: JSONPosition,
      * @instance
      * @return {Line|boolean} False if impossible line else the line object.
      */
-    that.returnLine = function() {
+    that.returnLine = ():JSONGeometryLine|boolean => {
         let bez = [];
         const axes = util.findAxes(that.crossAxe);
 

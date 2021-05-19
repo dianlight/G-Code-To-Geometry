@@ -8,14 +8,28 @@ import { JSONError, JSONGeometry } from './JSONGeometry';
 //import util from './util'
 //import { StraightLine, CurvedLine } from './lines'
 
+
+export interface GCodeToGeometryOptions {
+    exposeParsedGcode: boolean,
+    maxErrorsRepoted: number,
+    decimals: number
+}
 /**
  * Parses the GCode into a series of lines and curves and checks if errors.
  *
  * @param {string} code - The GCode.
+ * @param {options} option - The parser options
  * @returns {ParsedGCode} The parsed GCode.
  */
-export function parse(code:string): JSONGeometry {
-    "use strict";
+export function parse(code:string, options?: Partial<GCodeToGeometryOptions>): JSONGeometry {
+    //"use strict";
+
+    const currentOptions: GCodeToGeometryOptions = {
+        exposeParsedGcode: true,
+        maxErrorsRepoted: 10,
+        decimals: 3
+    }
+    Object.assign(currentOptions,options)
 
     // let unitIsSet = false;
     // let setInInch = true;
@@ -455,7 +469,7 @@ export function parse(code:string): JSONGeometry {
     lexer.addErrorListener({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
         syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
-            parserError.push({
+            if(parserError.length <= currentOptions.maxErrorsRepoted) parserError.push({
                 isSkipped: true,
                 line,
                 message: '['+charPositionInLine+'] ' + msg
@@ -468,7 +482,7 @@ export function parse(code:string): JSONGeometry {
     parser.addErrorListener({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
         syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
-            parserError.push({
+            if(parserError.length <= currentOptions.maxErrorsRepoted) parserError.push({
                 isSkipped: true,
                 line,
                 message: '['+charPositionInLine+'] ' + msg
@@ -478,11 +492,20 @@ export function parse(code:string): JSONGeometry {
     const tree = parser.program()
     
 /* */
-    const interpreterVisitor = new InterpreterVisitor()
+    const interpreterVisitor = new InterpreterVisitor(currentOptions)
 
     const geometry = interpreterVisitor.visit(tree);
 
-    geometry.errorList.push(...parserError)
+    if (parserError.length < currentOptions.maxErrorsRepoted) {
+        geometry.errorList.push(...parserError)        
+    } else {
+        geometry.errorList.push(...parserError.slice(0,currentOptions.maxErrorsRepoted))
+        geometry.errorList.push({
+            isSkipped: false,
+            line: -1,
+            message: `Too many errors. Only first ${currentOptions.maxErrorsRepoted} are reported`
+        })
+    }
 
     return geometry;
 /* */

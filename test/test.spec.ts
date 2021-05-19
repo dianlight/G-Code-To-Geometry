@@ -1,12 +1,14 @@
-import * as GCodeToGeometry from "../src/gcodetogeometry"
-import fs from 'fs'
-import path from 'path'
+//import * as GCodeToGeometry from "../src/gcodetogeometry"
+//import fs from 'fs'
+//import path from 'path'
 import * as jestEx from './jest.exutil'
-import os from 'os'
+//import os from 'os'
 
 
 describe("Test GCODE Partsing capability", () => {
     it('Parse Case#1 GCode - Small Test', () => {
+        jestEx.doParserTest('case#1', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#1.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#1.json')).toString());
     //    console.log(code)
@@ -19,9 +21,12 @@ describe("Test GCODE Partsing capability", () => {
 //        expect(jestEx.roughSizeOfObject(cresult)).toBeLessThan(stmem - os.freemem())
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
+        */
     })
 
     it('Parse Case#2 GCode - Micro Test', () => {
+        jestEx.doParserTest('case#2', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#2.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#2.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -29,9 +34,12 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toBeDefined();
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
+        */
     })
 
     it('Parse Case#3 GCode - boomerangv3 / command splitted /', () => {
+        jestEx.doParserTest('case#3', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#3.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#3.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -39,22 +47,29 @@ describe("Test GCODE Partsing capability", () => {
         expect(cresult).toBeDefined();
         cresult.gcode = result.gcode = [];
         expect(cresult).toEqual(result);
+        */
     })
 
-    /* Parser Error * /
+    /* Parser Error */
     it('Parse Case#5 GCode', () => {
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#5.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#5.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
-        var cresult = GCodeToGeometry.parse(code);
-        fs.writeFileSync(path.join(__dirname, 'case#5.json'), JSON.stringify(cresult, null, 2));
+        const cresult = GCodeToGeometry.parse(code);
+//        fs.writeFileSync(path.join(__dirname, 'case#5.json'), JSON.stringify(cresult, null, 2));
+        cresult.gcode = result.gcode = [];
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
+        */
+        jestEx.doParserTest('case#5', {}, false);
     })
     /* */
 
     /* */
     it('Parse Case#6 GCode - FLATCAM Test', () => {
+        jestEx.doParserTest('case#6', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#6.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#6.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -62,11 +77,14 @@ describe("Test GCODE Partsing capability", () => {
     //    fs.writeFileSync(path.join(__dirname, 'case#6.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
+        */
     })
     /* */
 
     /* Multiple coordinate without G command. If allowed correct parser */
     it('Parse Case#7 GCode - / G optional line splitting /', () => {
+        jestEx.doParserTest('case#7', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#7.gcode')).toString();
         const result = fs.readFileSync(path.join(__dirname, 'case#7.json')).toString();
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -74,11 +92,14 @@ describe("Test GCODE Partsing capability", () => {
 //        fs.writeFileSync(path.join(__dirname, 'case#7.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(JSON.stringify(cresult, null, 2)).toEqual(result);
+        */
     })
     /* */
 
     /* To many error */
     it('Parse Case#8 GCode', () => {
+        jestEx.doParserTest('case#8', {}, false);
+        /*
         const code = fs.readFileSync(path.join(__dirname, 'case#8.gcode')).toString();
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#8.json')).toString());
         expect(GCodeToGeometry.parse).toBeDefined();
@@ -86,8 +107,22 @@ describe("Test GCODE Partsing capability", () => {
 //        fs.writeFileSync(path.join(__dirname, 'case#8.json'), JSON.stringify(cresult, null, 2));
         expect(cresult).toBeDefined();
         expect(cresult).toEqual(result);
+        */
     })
     /* */
+
+    test('Parse Case#10 GCode', () => {
+        jestEx.doParserTest('case#10', {}, false);
+        /*
+        const code = fs.readFileSync(path.join(__dirname, 'case#10.gcode')).toString();
+        const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#10.json')).toString());
+        expect(GCodeToGeometry.parse).toBeDefined();
+        var cresult = GCodeToGeometry.parse(code);
+        fs.writeFileSync(path.join(__dirname, 'case#10.json'), JSON.stringify(cresult, null, 2));
+        expect(cresult).toBeDefined();
+        expect(cresult).toEqual(result);
+        */
+    })
 })
 
 
@@ -118,15 +153,7 @@ test('Parse Case#9 GCode', () => {
 })
 */
 /* No OLD
-test('Parse Case#10 GCode', () => {
-    const code = fs.readFileSync(path.join(__dirname, 'case#10.gcode')).toString();
-    const result = JSON.parse(fs.readFileSync(path.join(__dirname, 'case#10.json')).toString());
-    expect(GCodeToGeometry.parse).toBeDefined();
-    var cresult = GCodeToGeometry.parse(code);
-    fs.writeFileSync(path.join(__dirname, 'case#10.json'), JSON.stringify(cresult, null, 2));
-    expect(cresult).toBeDefined();
-    expect(cresult).toEqual(result);
-})
+
 */
 
 

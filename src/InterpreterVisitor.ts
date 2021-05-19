@@ -3,17 +3,22 @@ import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor
 import { gcodeVisitor } from "./antlr/gcodeVisitor"
 import { JSONGeometry, JSONGeometryLine, JSONPosition } from "./JSONGeometry";
 import { CNCSettings, CurvedLine } from "./lines"
+import { GCodeToGeometryOptions } from "./gcodetogeometry";
 
 
 interface CurrentLine extends JSONGeometryLine {
     r: number,
     i: number,
     j: number,
-    k: number
+//    k: number
 }
 
 
 export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> implements gcodeVisitor<JSONGeometry> {
+
+    constructor(private currentOptions: GCodeToGeometryOptions) {
+        super()
+    }
 
     geometry: JSONGeometry = {
         lines: [],
@@ -27,6 +32,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
     }
 
     currentLine: Partial<CurrentLine> = {};
+    previusLine: Partial<CurrentLine> = {};
 
     settings: CNCSettings = {
         feedrate:0,
@@ -47,11 +53,23 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         return this.geometry;
     }
 
+    protected roundToPrecision(n: number): number {
+    //    Math.trunc()
+    //    return Math.round( (n + Number.EPSILON ) * (10*this.currentOptions.decimals) ) / (10*this.currentOptions.decimals)
+        return Number.parseFloat(n.toFixed(this.currentOptions.decimals))
+    }
+
     protected emitCurrentLine(): 'G0'|'G1'|'G2'|'G3' {
         if(!this.currentLine.type)return undefined
         switch (this.currentLine.type) {
             case 'G0':
             case 'G1':
+                this.currentLine.start.x = this.roundToPrecision(this.currentLine.start.x)
+                this.currentLine.start.y = this.roundToPrecision(this.currentLine.start.y)
+                this.currentLine.start.z = this.roundToPrecision(this.currentLine.start.z)
+                this.currentLine.end.x = this.roundToPrecision(this.currentLine.end.x)
+                this.currentLine.end.y = this.roundToPrecision(this.currentLine.end.y)
+                this.currentLine.end.z = this.roundToPrecision(this.currentLine.end.z)
                 this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine);
                 return this.currentLine.type
             case 'G2':
@@ -70,7 +88,22 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                             line: this.currentLine.lineNumber, message: "(error) Impossible to create arc.", isSkipped: true
                         })
                     } else {
-                        this.geometry.lines.push(temp);
+                        const line = temp as JSONGeometryLine;
+                        line.beziers.forEach(p => {
+                            p.p0.x = this.roundToPrecision(p.p0.x)
+                            p.p0.y = this.roundToPrecision(p.p0.y)
+                            p.p0.z = this.roundToPrecision(p.p0.z)
+                            p.p1.x = this.roundToPrecision(p.p1.x)
+                            p.p1.y = this.roundToPrecision(p.p1.y)
+                            p.p1.z = this.roundToPrecision(p.p1.z)
+                            p.p2.x = this.roundToPrecision(p.p2.x)
+                            p.p2.y = this.roundToPrecision(p.p2.y)
+                            p.p2.z = this.roundToPrecision(p.p2.z)
+                            p.p3.x = this.roundToPrecision(p.p3.x)
+                            p.p3.y = this.roundToPrecision(p.p3.y)
+                            p.p3.z = this.roundToPrecision(p.p3.z)
+                        })
+                        this.geometry.lines.push(line);
                         // console.log("-----TM-------------------\n", JSON.stringify(temp,null,2));
                         //   settings.feedrate = line.feedrate;
                         //   settings.previousMoveCommand = command.type;
@@ -121,8 +154,9 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
 //        console.log("LINE", ctx.lineNumber()?.text)
 //        const stream = ctx.start.inputStream;
 //        this.geometry.gcode.push(stream.getText(new Interval(ctx.start.startIndex, ctx.stop.stopIndex)))
-        this.geometry.gcode.push(ctx.text.replace(/\r?\n|\r/,""))
+        if(this.currentOptions.exposeParsedGcode)this.geometry.gcode.push(ctx.text.replace(/\r?\n|\r/,""))
         const oldType = this.emitCurrentLine()
+        this.previusLine = this.shallow(this.currentLine);
         this.currentLine = {}
         this.currentLine.lineNumber = ctx.start.line
         this.settings.oldType = oldType
@@ -248,10 +282,13 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
     // console.log("\t\tI->",ctx.e().text)
     if (!this.currentLine.end && this.settings.oldType) {
         this.currentLine.start = this.shallow(this.position)
-        this.currentLine.end =  this.shallow(this.position)
+        this.currentLine.end = this.shallow(this.position)
         this.currentLine.type = this.settings.oldType
         this.currentLine.feedrate = this.settings.feedrate
-    }     
+    }
+    if (!this.currentLine.end) return
+    if (!this.currentLine.j) this.currentLine.j = this.previusLine.j;
+    //if (!this.currentLine.k) this.currentLine.k = this.previusLine.k;
     this.currentLine.i = Number.parseFloat(ctx.e().text)
     return this.geometry
 }
@@ -269,6 +306,9 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         this.currentLine.type = this.settings.oldType
         this.currentLine.feedrate = this.settings.feedrate
     }     
+    if (!this.currentLine.end) return
+    if (!this.currentLine.i) this.currentLine.i = this.previusLine.i;
+   // if (!this.currentLine.k) this.currentLine.k = this.previusLine.k;
     this.currentLine.j = Number.parseFloat(ctx.e().text)
     return this.geometry
 }
@@ -291,8 +331,9 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
             this.currentLine.end =  this.shallow(this.position)
             this.currentLine.type = this.settings.oldType
             this.currentLine.feedrate = this.settings.feedrate
-        }     
-            this.currentLine.r = Number.parseFloat(ctx.e().text)
+        }
+        if(!this.currentLine.end) return
+        this.currentLine.r = Number.parseFloat(ctx.e().text)
         return this.geometry
   }
 
@@ -309,6 +350,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
             this.currentLine.type = this.settings.oldType
             this.currentLine.feedrate = this.settings.feedrate
         }
+        if(!this.currentLine.end) return
         this.currentLine.end.x = Number.parseFloat(ctx.e().text)
         this.position.x = Number.parseFloat(ctx.e().text)
         this.geometry.size.min.x = Math.min(this.geometry.size.min.x,this.position.x) 
@@ -329,6 +371,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         this.currentLine.type = this.settings.oldType
         this.currentLine.feedrate = this.settings.feedrate
     }
+    if(!this.currentLine.end) return
 this.currentLine.end.y =Number.parseFloat(ctx.e().text)
     this.position.y = Number.parseFloat(ctx.e().text)
      this.geometry.size.min.y = Math.min(this.geometry.size.min.y,this.position.y) 
@@ -348,6 +391,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
         this.currentLine.type = this.settings.oldType
         this.currentLine.feedrate = this.settings.feedrate
     }
+    if(!this.currentLine.end) return
      this.currentLine.end.z = Number.parseFloat(ctx.e().text)
      this.position.z = Number.parseFloat(ctx.e().text)
      this.geometry.size.min.z = Math.min(this.geometry.size.min.z,this.position.z) 
@@ -375,6 +419,7 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
         this.currentLine.type = this.settings.oldType
         this.currentLine.feedrate = this.settings.feedrate
     }     
+    if(!this.currentLine.end) return
      this.currentLine.feedrate = Number.parseFloat(ctx.e().text);
      this.settings.feedrate = Number.parseFloat(ctx.e().text)
     return this.geometry
