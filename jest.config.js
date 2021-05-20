@@ -10,5 +10,6 @@ module.exports = {
     "transform": {
         "^.+\\.(ts|tsx)$": "ts-jest"
     },
-    "moduleFileExtensions": ['js', 'json', 'jsx', 'ts', 'tsx', 'node']
+    "moduleFileExtensions": ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
+    reporters: ['default', 'jest-progress-bar-reporter', "jest-spec-reporter"]
 }

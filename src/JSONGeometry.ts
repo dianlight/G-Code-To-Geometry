@@ -1,5 +1,4 @@
 
-
 export interface JSONPosition {
     x: number,
     y: number,
@@ -27,13 +26,37 @@ export interface JSONGeometryLine {
     feedrate: number
 }
 
+export interface JSONBoundingBox {
+    min: JSONPosition,
+    max: JSONPosition
+}
+
 export interface JSONGeometry {
     gcode: string[],
     lines: JSONGeometryLine[],
-    size: {
-        min: JSONPosition,
-        max: JSONPosition
-    },
+    size: JSONBoundingBox,
     displayInInch: boolean,
     errorList: JSONError[]
 }
+
+export enum JSONGeometryEvent {
+    BEGIN,
+    ERROR,
+    GCODE,
+    LINE,
+    ARC,
+    END
+}
+
+/*
+export interface JSONGeometryStream {
+    gcode: ReadableStream<string>,
+    lines: ReadableStream<JSONGeometryLine>,
+    size: Promise<{
+        min: JSONPosition,
+        max: JSONPosition
+    }>,
+    displayInInch: boolean,
+    errorList: ReadableStream<JSONError>    
+}
+*/

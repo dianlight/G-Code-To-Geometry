@@ -13,7 +13,8 @@
         ],
         "type": "pwa-node",
         "console": "integratedTerminal",
-        "internalConsoleOptions": "neverOpen"
+        "internalConsoleOptions": "neverOpen",
+        "outputCapture": "std",
       },
       {
         "type": "node",
@@ -30,6 +31,7 @@
         ],
         "protocol": "inspector",
         "console": "integratedTerminal",
+        "outputCapture": "std",
         "internalConsoleOptions": "neverOpen"
       },
       {
@@ -45,7 +47,8 @@
           "--runInBand",
           "--logHeapUsage",
           "--runInBand"
-        ]
+        ],
+        "outputCapture": "std",
       }
     ]
   }

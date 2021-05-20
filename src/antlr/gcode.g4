@@ -40,9 +40,10 @@ line		: ( BLOCK_DELETE )? ( lineNumber )? ( segment )* endOfLine ;
 
 segment		: word | parameterSetting | comment | oword_label oword_statement;
 
-comment		: MESSAGE_COMMENT | IGNORED_COMMENT ;
+comment		: MESSAGE_COMMENT | IGNORED_COMMENT | LINE_COMMENT ;
 MESSAGE_COMMENT : '(MSG' COMMENT_TEXT ')' ;
 IGNORED_COMMENT : '(' COMMENT_TEXT ')' ;
+LINE_COMMENT : ';' ~[\r\n]* ;
 
 parameterSetting : parameter EQUALS e ;
 
@@ -84,12 +85,13 @@ i : ('i'|'I') e ; // X-axis offset for arcs | 'x' offset in G87 canned cycle
 j : ('j'|'J') e ; // Y-axis offset for arcs | 'y' offset in G87 canned cycle
 k : ('k'|'K') e ; // Z-axis offset for arcs | 'z' offset in G87 canned cycle
 r : ('r'|'R') e ; // arc radius | canned cycle plane
-x : ('x'|'X') e ; // X-axis of machine
-y : ('y'|'Y') e ; // Y-axis of machine
-z : ('z'|'Z') e ; // Z-axis of machines
+x : ('x'|'X') e?; // X-axis of machine
+y : ('y'|'Y') e?; // Y-axis of machine
+z : ('z'|'Z') e?; // Z-axis of machines
 
-dimensionWord : f;
+dimensionWord : f | ex;
 f : ('f'|'F') e; // feedrate
+ex: ('e'|'E') e; // extruderrate
 
 d : ('d'|'D') ; // tool radius compensation NUMBER
 g : ('g'|'G') ; // general function (see Table 5)
@@ -231,14 +233,17 @@ g99 : G99 ; // R-point level return in canned cycles
 
 //// Table 7: M codes /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-mWord : mgroup4 | mgroup6 | mgroup7 | mgroup8 | mgroup9 ; 
+mWord : mgroup4 | mgroup6 | mgroup7 | mgroup8 | mgroup9 | mgroup10 | mgroup11 | mgroup12; 
 
 //The modal groups for M codes are:
-mgroup4 : m0 | m1 | m2 | m30 | m60 ; // stopping
+mgroup4 : m0 | m1 | m2 | m30 | m60 | m84 ; // stopping
 mgroup6 : m6 ; // tool change
 mgroup7 : m3 | m4 | m5 ; //  spindle turning
 mgroup8 : m7 | m8 | m9 ; // coolant (special case: M7 and M8 ma'y'be active at the same time)
 mgroup9 : m48 | m49 ; // enable/disable feed and speed override switches
+mgroup10: m82 ; // extrusion 
+mgroup11: m201 | m203 | m204 | m205 | m220 | m221 ; // accelleration
+mgroup12: m104 | m105 | m106 | m107 | m109 | m140 | m141 | m190 ; // unclassified yet
 
 M0 : M '0'* '0' ;
 M1 : M '0'* '1' ;
@@ -254,6 +259,23 @@ M30 : M '0'* '30' ;
 M48 : M '0'* '48' ;
 M49 : M '0'* '49' ;
 M60 : M '0'* '60' ;
+M82 : M '0'* '82' ;
+M84 : M '0'* '84' ;
+M104: M '104' ;
+M105: M '105' ;
+M106: M '106' ;
+M107: M '107' ;
+M109: M '109' ;
+M140 : M '140' ;
+M141 : M '141' ;
+M190 : M '190' ;
+M201 : M '201' ;
+M203 : M '203' ;
+M204 : M '204' ;
+M205 : M '205' ;
+M220 : M '220' ;
+M221 : M '221' ;
+
 
 m0 : M0 ; // program stop
 m1 : M1 ; // optional program stop
@@ -269,6 +291,22 @@ m30 : M30 ; // program end, pallet shuttle, and reset
 m48 : M48 ; // enable speed and feed overrides
 m49 : M49 ; // disable speed and feed overrides
 m60 : M60 ; // pallet shuttle and program stop
+m82 : M82 ; // absolute extrusion mode
+m84 : M84 ; // Disable all steppers but Z
+m104: M104 ;
+m105: M105 ;
+m106: M106 ;
+m107: M107 ;
+m109: M109 ;
+m140: M140 ;
+m141: M141 ;
+m190: M190 ;
+m201: M201 ; // Setup machine max acceleration
+m203: M203 ; // Setup machine max feedrate
+m204: M204 ; // Setup Print/Retract/Travel acceleration
+m205: M205 ; // Setup Jerk
+m220: M220 ; // Reset Feedrate
+m221: M221 ; // Reset Flowrate
 
 
 e returns [number v]: logicalExpression { $v = $logicalExpression.v; };

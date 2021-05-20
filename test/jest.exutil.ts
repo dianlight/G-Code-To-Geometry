@@ -1,7 +1,8 @@
-import { GCodeToGeometryOptions,parse } from "../src/gcodetogeometry";
+import { GCodeToGeometryOptions,parse, pullParser } from "../src/gcodetogeometry";
 import path from 'path';
 import fs from 'fs';
 import deepEqual from 'deep-equal'
+import { JSONError, JSONGeometry, JSONGeometryEvent, JSONGeometryLine } from "../src/JSONGeometry";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function roughSizeOfObject( object ):number {
@@ -54,4 +55,36 @@ export function doParserTest(gcodename: string, options: Partial<GCodeToGeometry
         expect(cresult).toBeDefined();
         fs.writeFileSync(path.join(__dirname, gcodename+'.json'), JSON.stringify(cresult, null, 2));
     }
+}
+
+export async function doParserTestAsync(gcodename: string, options: Partial<GCodeToGeometryOptions>): Promise<void> {
+    return new Promise((resolve) => {
+        const code = fs.createReadStream(path.join(__dirname, gcodename + '.gcode'));
+        const result = JSON.parse(fs.readFileSync(path.join(__dirname, gcodename + '.json')).toString()) as JSONGeometry;
+        expect(pullParser).toBeDefined();
+        const _cresult = pullParser(code, options);
+        expect(_cresult).toBeDefined();
+        let p = 0, e = 0, c = 0;
+        _cresult.then((_ev) => {
+            _ev.on(JSONGeometryEvent.GCODE.toString(), (code: string) => {
+                expect(code).toEqual(result.gcode[c++])
+            })                
+            _ev.on(JSONGeometryEvent.LINE.toString(), (line: JSONGeometryLine) => {
+                if (deepEqual(line, result.lines[p++])) return
+                expect(JSON.stringify(line,null,2)).toEqual(JSON.stringify(result.lines[p],null,2))
+            })                
+            _ev.on(JSONGeometryEvent.ARC.toString(), (line: JSONGeometryLine) => {
+                expect(line).toEqual(result.lines[p++])
+            })                
+            _ev.on(JSONGeometryEvent.ERROR.toString(), (error: JSONError) => {
+//                expect(error).toEqual(result.errorList[e++])
+            })                
+            _ev.on(JSONGeometryEvent.END.toString(), (result: JSONGeometry) => {
+                expect(result.size).toEqual(result.size)
+                resolve()
+            })
+            _ev.emit(JSONGeometryEvent.BEGIN.toString())
+        })
+    })
+
 }

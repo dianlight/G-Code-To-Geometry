@@ -2,9 +2,12 @@
 
 import { gcodeLexer } from './antlr/gcodeLexer'
 import { gcodeParser } from './antlr/gcodeParser'
-import { ANTLRErrorListener, CharStreams, CommonTokenStream, ConsoleErrorListener, RecognitionException, Recognizer } from 'antlr4ts'
+import { ANTLRErrorListener, CharStreams, CodePointBuffer, CodePointCharStream, CommonTokenStream, ConsoleErrorListener, RecognitionException, Recognizer } from 'antlr4ts'
 import { InterpreterVisitor } from './InterpreterVisitor'
-import { JSONError, JSONGeometry } from './JSONGeometry';
+import { JSONError, JSONGeometry, JSONGeometryEvent } from './JSONGeometry';
+import stream from "stream"
+import events from 'events';
+
 //import util from './util'
 //import { StraightLine, CurvedLine } from './lines'
 
@@ -14,6 +17,89 @@ export interface GCodeToGeometryOptions {
     maxErrorsRepoted: number,
     decimals: number
 }
+
+/**
+ * Parses the GCode into a series of lines and curves and checks if errors.
+ *
+ * @param {string} code - The GCode.
+ * @param {options} option - The parser options
+ * @returns {ParsedGCode} The parsed GCode.
+ */
+export async function pullParser(code: stream.Readable, options?: Partial<GCodeToGeometryOptions>):Promise<events.EventEmitter> {
+
+    const currentOptions: GCodeToGeometryOptions = {
+        exposeParsedGcode: true,
+        maxErrorsRepoted: 10,
+        decimals: 3
+    }
+    Object.assign(currentOptions,options)    
+ 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return new Promise<events.EventEmitter>((resolve, _reject) => {
+
+        let errors = 0;
+        const codeBuffer = CodePointBuffer.builder(10)
+        const emitter = new events.EventEmitter()
+        code.on("end", async () => {
+            const inputStream = codeBuffer.build()
+            const lexer = new gcodeLexer(CodePointCharStream.fromBuffer(inputStream));
+            lexer.removeErrorListener(ConsoleErrorListener.INSTANCE);
+            lexer.addErrorListener({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
+                    if(errors <= currentOptions.maxErrorsRepoted) emitter.emit(JSONGeometryEvent.ERROR.toString(), {
+                        isSkipped: true,
+                        line,
+                        message: '['+charPositionInLine+'] ' + msg
+                    })
+                    errors++
+                }
+            } as ANTLRErrorListener<number>)
+            const tokenStream = new CommonTokenStream(lexer);
+            const parser = new gcodeParser(tokenStream);
+            parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
+            parser.addErrorListener({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                syntaxError(recognizer: Recognizer<number, any>, offendingSymbol: number | undefined, line: number, charPositionInLine: number, msg: string, _e: RecognitionException | undefined) {
+                    if(errors <= currentOptions.maxErrorsRepoted)emitter.emit(JSONGeometryEvent.ERROR.toString(),{
+                        isSkipped: true,
+                        line,
+                        message: '['+charPositionInLine+'] ' + msg
+                    })
+                    errors++
+                }
+            } as ANTLRErrorListener<number>)
+            const tree = parser.program()
+    
+            const interpreterVisitor = new InterpreterVisitor(currentOptions, emitter)
+            
+            emitter.once(JSONGeometryEvent.BEGIN.toString(), () => {
+                /**
+                 * This is a good point to inter workers! :) 
+                 */
+                interpreterVisitor.visit(tree);
+
+                if (errors > currentOptions.maxErrorsRepoted) {
+                    emitter.emit(JSONGeometryEvent.ERROR.toString(),{
+                        isSkipped: false,
+                        line: -1,
+                        message: `Too many errors. Only first ${currentOptions.maxErrorsRepoted} are reported`
+                    })
+                }            
+            })
+
+            resolve(emitter)
+
+        });
+        code.on('readable', () => {
+            let data;
+            // eslint-disable-next-line no-cond-assign
+            while (data = code.read()) {
+                codeBuffer.append(data)
+            }
+        })
+    });
+ }
 /**
  * Parses the GCode into a series of lines and curves and checks if errors.
  *

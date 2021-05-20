@@ -28,6 +28,7 @@ import { YContext } from "./gcodeParser";
 import { ZContext } from "./gcodeParser";
 import { DimensionWordContext } from "./gcodeParser";
 import { FContext } from "./gcodeParser";
+import { ExContext } from "./gcodeParser";
 import { DContext } from "./gcodeParser";
 import { GContext } from "./gcodeParser";
 import { HContext } from "./gcodeParser";
@@ -108,6 +109,9 @@ import { Mgroup6Context } from "./gcodeParser";
 import { Mgroup7Context } from "./gcodeParser";
 import { Mgroup8Context } from "./gcodeParser";
 import { Mgroup9Context } from "./gcodeParser";
+import { Mgroup10Context } from "./gcodeParser";
+import { Mgroup11Context } from "./gcodeParser";
+import { Mgroup12Context } from "./gcodeParser";
 import { M0Context } from "./gcodeParser";
 import { M1Context } from "./gcodeParser";
 import { M2Context } from "./gcodeParser";
@@ -122,6 +126,22 @@ import { M30Context } from "./gcodeParser";
 import { M48Context } from "./gcodeParser";
 import { M49Context } from "./gcodeParser";
 import { M60Context } from "./gcodeParser";
+import { M82Context } from "./gcodeParser";
+import { M84Context } from "./gcodeParser";
+import { M104Context } from "./gcodeParser";
+import { M105Context } from "./gcodeParser";
+import { M106Context } from "./gcodeParser";
+import { M107Context } from "./gcodeParser";
+import { M109Context } from "./gcodeParser";
+import { M140Context } from "./gcodeParser";
+import { M141Context } from "./gcodeParser";
+import { M190Context } from "./gcodeParser";
+import { M201Context } from "./gcodeParser";
+import { M203Context } from "./gcodeParser";
+import { M204Context } from "./gcodeParser";
+import { M205Context } from "./gcodeParser";
+import { M220Context } from "./gcodeParser";
+import { M221Context } from "./gcodeParser";
 import { EContext } from "./gcodeParser";
 import { LogicalExpressionContext } from "./gcodeParser";
 import { ComparisonExpressionContext } from "./gcodeParser";
@@ -414,6 +434,17 @@ export interface gcodeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitF?: (ctx: FContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.ex`.
+	 * @param ctx the parse tree
+	 */
+	enterEx?: (ctx: ExContext) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.ex`.
+	 * @param ctx the parse tree
+	 */
+	exitEx?: (ctx: ExContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `gcodeParser.d`.
@@ -1296,6 +1327,39 @@ export interface gcodeListener extends ParseTreeListener {
 	exitMgroup9?: (ctx: Mgroup9Context) => void;
 
 	/**
+	 * Enter a parse tree produced by `gcodeParser.mgroup10`.
+	 * @param ctx the parse tree
+	 */
+	enterMgroup10?: (ctx: Mgroup10Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.mgroup10`.
+	 * @param ctx the parse tree
+	 */
+	exitMgroup10?: (ctx: Mgroup10Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.mgroup11`.
+	 * @param ctx the parse tree
+	 */
+	enterMgroup11?: (ctx: Mgroup11Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.mgroup11`.
+	 * @param ctx the parse tree
+	 */
+	exitMgroup11?: (ctx: Mgroup11Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.mgroup12`.
+	 * @param ctx the parse tree
+	 */
+	enterMgroup12?: (ctx: Mgroup12Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.mgroup12`.
+	 * @param ctx the parse tree
+	 */
+	exitMgroup12?: (ctx: Mgroup12Context) => void;
+
+	/**
 	 * Enter a parse tree produced by `gcodeParser.m0`.
 	 * @param ctx the parse tree
 	 */
@@ -1448,6 +1512,182 @@ export interface gcodeListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitM60?: (ctx: M60Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m82`.
+	 * @param ctx the parse tree
+	 */
+	enterM82?: (ctx: M82Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m82`.
+	 * @param ctx the parse tree
+	 */
+	exitM82?: (ctx: M82Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m84`.
+	 * @param ctx the parse tree
+	 */
+	enterM84?: (ctx: M84Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m84`.
+	 * @param ctx the parse tree
+	 */
+	exitM84?: (ctx: M84Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m104`.
+	 * @param ctx the parse tree
+	 */
+	enterM104?: (ctx: M104Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m104`.
+	 * @param ctx the parse tree
+	 */
+	exitM104?: (ctx: M104Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m105`.
+	 * @param ctx the parse tree
+	 */
+	enterM105?: (ctx: M105Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m105`.
+	 * @param ctx the parse tree
+	 */
+	exitM105?: (ctx: M105Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m106`.
+	 * @param ctx the parse tree
+	 */
+	enterM106?: (ctx: M106Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m106`.
+	 * @param ctx the parse tree
+	 */
+	exitM106?: (ctx: M106Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m107`.
+	 * @param ctx the parse tree
+	 */
+	enterM107?: (ctx: M107Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m107`.
+	 * @param ctx the parse tree
+	 */
+	exitM107?: (ctx: M107Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m109`.
+	 * @param ctx the parse tree
+	 */
+	enterM109?: (ctx: M109Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m109`.
+	 * @param ctx the parse tree
+	 */
+	exitM109?: (ctx: M109Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m140`.
+	 * @param ctx the parse tree
+	 */
+	enterM140?: (ctx: M140Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m140`.
+	 * @param ctx the parse tree
+	 */
+	exitM140?: (ctx: M140Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m141`.
+	 * @param ctx the parse tree
+	 */
+	enterM141?: (ctx: M141Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m141`.
+	 * @param ctx the parse tree
+	 */
+	exitM141?: (ctx: M141Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m190`.
+	 * @param ctx the parse tree
+	 */
+	enterM190?: (ctx: M190Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m190`.
+	 * @param ctx the parse tree
+	 */
+	exitM190?: (ctx: M190Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m201`.
+	 * @param ctx the parse tree
+	 */
+	enterM201?: (ctx: M201Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m201`.
+	 * @param ctx the parse tree
+	 */
+	exitM201?: (ctx: M201Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m203`.
+	 * @param ctx the parse tree
+	 */
+	enterM203?: (ctx: M203Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m203`.
+	 * @param ctx the parse tree
+	 */
+	exitM203?: (ctx: M203Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m204`.
+	 * @param ctx the parse tree
+	 */
+	enterM204?: (ctx: M204Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m204`.
+	 * @param ctx the parse tree
+	 */
+	exitM204?: (ctx: M204Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m205`.
+	 * @param ctx the parse tree
+	 */
+	enterM205?: (ctx: M205Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m205`.
+	 * @param ctx the parse tree
+	 */
+	exitM205?: (ctx: M205Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m220`.
+	 * @param ctx the parse tree
+	 */
+	enterM220?: (ctx: M220Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m220`.
+	 * @param ctx the parse tree
+	 */
+	exitM220?: (ctx: M220Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `gcodeParser.m221`.
+	 * @param ctx the parse tree
+	 */
+	enterM221?: (ctx: M221Context) => void;
+	/**
+	 * Exit a parse tree produced by `gcodeParser.m221`.
+	 * @param ctx the parse tree
+	 */
+	exitM221?: (ctx: M221Context) => void;
 
 	/**
 	 * Enter a parse tree produced by `gcodeParser.e`.

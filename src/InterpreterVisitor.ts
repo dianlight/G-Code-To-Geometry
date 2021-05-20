@@ -1,9 +1,10 @@
-import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, IContext, JContext, LineContext, ProgramContext, RContext, SegmentContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
+import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, IContext, JContext, LineContext, MWordContext, ProgramContext, RContext, SegmentContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
 import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor"
 import { gcodeVisitor } from "./antlr/gcodeVisitor"
-import { JSONGeometry, JSONGeometryLine, JSONPosition } from "./JSONGeometry";
+import { JSONGeometry, JSONGeometryEvent, JSONGeometryLine, JSONPosition } from "./JSONGeometry";
 import { CNCSettings, CurvedLine } from "./lines"
 import { GCodeToGeometryOptions } from "./gcodetogeometry";
+import events from "events"
 
 
 interface CurrentLine extends JSONGeometryLine {
@@ -16,7 +17,9 @@ interface CurrentLine extends JSONGeometryLine {
 
 export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> implements gcodeVisitor<JSONGeometry> {
 
-    constructor(private currentOptions: GCodeToGeometryOptions) {
+    constructor(private currentOptions: GCodeToGeometryOptions
+        , private emitter?:events.EventEmitter
+    ) {
         super()
     }
 
@@ -70,7 +73,11 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                 this.currentLine.end.x = this.roundToPrecision(this.currentLine.end.x)
                 this.currentLine.end.y = this.roundToPrecision(this.currentLine.end.y)
                 this.currentLine.end.z = this.roundToPrecision(this.currentLine.end.z)
-                this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine);
+                if (!this.emitter) {
+                    this.geometry.lines.push(this.shallow(this.currentLine) as JSONGeometryLine)
+                } else {
+                    this.emitter.emit(JSONGeometryEvent.LINE.toString(),this.shallow(this.currentLine))
+                }
                 return this.currentLine.type
             case 'G2':
             case 'G3': {
@@ -103,15 +110,12 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
                             p.p3.y = this.roundToPrecision(p.p3.y)
                             p.p3.z = this.roundToPrecision(p.p3.z)
                         })
-                        this.geometry.lines.push(line);
-                        // console.log("-----TM-------------------\n", JSON.stringify(temp,null,2));
-                        //   settings.feedrate = line.feedrate;
-                        //   settings.previousMoveCommand = command.type;
-                        //   checkTotalSize(totalSize, line.getSize());
-                        //  lines.push(temp);
-                        //  settings.position = util.copyObject(line.end);
-                    }
-                    
+                        if (!this.emitter) {
+                            this.geometry.lines.push(line)
+                        } else {
+                            this.emitter.emit(JSONGeometryEvent.ARC.toString(),line)
+                        }
+                    }             
                 } else {
                     this.geometry.errorList.push({
                         line: this.currentLine.lineNumber,
@@ -141,6 +145,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
     visitProgram(ctx: ProgramContext): JSONGeometry {
         ctx.children?.forEach(ctxx => this.visit(ctxx))
         this.emitCurrentLine()
+        this.emitter?.emit(JSONGeometryEvent.END.toString(),this.geometry)
         return this.geometry
     }
 
@@ -151,29 +156,26 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
   * @return the visitor result
   */
     visitLine(ctx: LineContext): JSONGeometry {
-//        console.log("LINE", ctx.lineNumber()?.text)
-//        const stream = ctx.start.inputStream;
-//        this.geometry.gcode.push(stream.getText(new Interval(ctx.start.startIndex, ctx.stop.stopIndex)))
-        if(this.currentOptions.exposeParsedGcode)this.geometry.gcode.push(ctx.text.replace(/\r?\n|\r/,""))
+        if (this.currentOptions.exposeParsedGcode) {
+            if (!this.emitter) { 
+                this.geometry.gcode.push(ctx.text.replace(/\r?\n|\r/, ""))
+            } else {
+                this.emitter.emit(JSONGeometryEvent.GCODE.toString(),ctx.text.replace(/\r?\n|\r/, ""))
+            }
+        }
         const oldType = this.emitCurrentLine()
         this.previusLine = this.shallow(this.currentLine);
         this.currentLine = {}
         this.currentLine.lineNumber = ctx.start.line
         this.settings.oldType = oldType
-//        this.visit(ctx.lineNumber())
         ctx.segment().forEach(ctxx => this.visit(ctxx))
-//        this.geometry.lines.push({
-//            type: 'G1',
-//            feedrate: this.feedrate,
-//            lineNumber: ctx.start.line,       
-//        })
         return this.geometry
     }
  /**
   * Visit a parse tree produced by `gcodeParser.segment`.
   * @param ctx the parse tree
   * @return the visitor result
-  */
+  * /
     visitSegment(ctx: SegmentContext): JSONGeometry{
         if (ctx.word()) {
         //    console.log("S[", ctx.word().text,']')
@@ -181,6 +183,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         }
      return this.geometry
     }
+    */
 
  /**
   * Visit a parse tree produced by `gcodeParser.comment`.
@@ -287,7 +290,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         this.currentLine.feedrate = this.settings.feedrate
     }
     if (!this.currentLine.end) return
-    if (!this.currentLine.j) this.currentLine.j = this.previusLine.j;
+    if (!this.currentLine.j && this.previusLine) this.currentLine.j = this.previusLine.j;
     //if (!this.currentLine.k) this.currentLine.k = this.previusLine.k;
     this.currentLine.i = Number.parseFloat(ctx.e().text)
     return this.geometry
@@ -307,7 +310,7 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         this.currentLine.feedrate = this.settings.feedrate
     }     
     if (!this.currentLine.end) return
-    if (!this.currentLine.i) this.currentLine.i = this.previusLine.i;
+    if (!this.currentLine.i && this.previusLine) this.currentLine.i = this.previusLine.i;
    // if (!this.currentLine.k) this.currentLine.k = this.previusLine.k;
     this.currentLine.j = Number.parseFloat(ctx.e().text)
     return this.geometry
@@ -372,10 +375,10 @@ export class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> i
         this.currentLine.feedrate = this.settings.feedrate
     }
     if(!this.currentLine.end) return
-this.currentLine.end.y =Number.parseFloat(ctx.e().text)
+    this.currentLine.end.y =Number.parseFloat(ctx.e().text)
     this.position.y = Number.parseFloat(ctx.e().text)
-     this.geometry.size.min.y = Math.min(this.geometry.size.min.y,this.position.y) 
-     this.geometry.size.max.y = Math.max(this.geometry.size.max.y,this.position.y) 
+    this.geometry.size.min.y = Math.min(this.geometry.size.min.y,this.position.y) 
+    this.geometry.size.max.y = Math.max(this.geometry.size.max.y,this.position.y) 
     return this.geometry
  } 
  /**
@@ -392,11 +395,10 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
         this.currentLine.feedrate = this.settings.feedrate
     }
     if(!this.currentLine.end) return
-     this.currentLine.end.z = Number.parseFloat(ctx.e().text)
-     this.position.z = Number.parseFloat(ctx.e().text)
-     this.geometry.size.min.z = Math.min(this.geometry.size.min.z,this.position.z) 
-     this.geometry.size.max.z = Math.max(this.geometry.size.max.z,this.position.z) 
-
+    this.currentLine.end.z = Number.parseFloat(ctx.e().text)
+    this.position.z = Number.parseFloat(ctx.e().text)
+    this.geometry.size.min.z = Math.min(this.geometry.size.min.z,this.position.z) 
+    this.geometry.size.max.z = Math.max(this.geometry.size.max.z,this.position.z) 
     return this.geometry
 }
  /**
@@ -420,8 +422,8 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
         this.currentLine.feedrate = this.settings.feedrate
     }     
     if(!this.currentLine.end) return
-     this.currentLine.feedrate = Number.parseFloat(ctx.e().text);
-     this.settings.feedrate = Number.parseFloat(ctx.e().text)
+    this.currentLine.feedrate = Number.parseFloat(ctx.e().text);
+    this.settings.feedrate = Number.parseFloat(ctx.e().text)
     return this.geometry
 }
  /**
@@ -1008,8 +1010,13 @@ this.currentLine.end.y =Number.parseFloat(ctx.e().text)
   * Visit a parse tree produced by `gcodeParser.mWord`.
   * @param ctx the parse tree
   * @return the visitor result
-  * /
- visitMWord?: (ctx: MWordContext) => Result;
+  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    visitMWord(_ctx: MWordContext): JSONGeometry {
+        this.previusLine = {}
+        this.settings.oldType = undefined;
+      return null;
+  }
 
  /**
   * Visit a parse tree produced by `gcodeParser.mgroup4`.
