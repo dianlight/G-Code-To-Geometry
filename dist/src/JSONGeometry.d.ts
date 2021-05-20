@@ -21,13 +21,22 @@ export interface JSONGeometryLine {
     }[];
     feedrate: number;
 }
+export interface JSONBoundingBox {
+    min: JSONPosition;
+    max: JSONPosition;
+}
 export interface JSONGeometry {
     gcode: string[];
     lines: JSONGeometryLine[];
-    size: {
-        min: JSONPosition;
-        max: JSONPosition;
-    };
+    size: JSONBoundingBox;
     displayInInch: boolean;
     errorList: JSONError[];
+}
+export declare enum JSONGeometryEvent {
+    BEGIN = 0,
+    ERROR = 1,
+    GCODE = 2,
+    LINE = 3,
+    ARC = 4,
+    END = 5
 }

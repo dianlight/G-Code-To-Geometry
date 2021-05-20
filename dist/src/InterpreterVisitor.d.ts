@@ -1,21 +1,28 @@
-import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, IContext, JContext, LineContext, ProgramContext, RContext, SegmentContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
+/// <reference types="node" />
+import { FContext, G0Context, G17Context, G18Context, G19Context, G1Context, G20Context, G21Context, G2Context, G3Context, IContext, JContext, LineContext, MWordContext, ProgramContext, RContext, XContext, YContext, ZContext } from "./antlr/gcodeParser";
 import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor";
 import { gcodeVisitor } from "./antlr/gcodeVisitor";
 import { JSONGeometry, JSONGeometryLine, JSONPosition } from "./JSONGeometry";
 import { CNCSettings } from "./lines";
+import { GCodeToGeometryOptions } from "./gcodetogeometry";
+import events from "events";
 interface CurrentLine extends JSONGeometryLine {
     r: number;
     i: number;
     j: number;
-    k: number;
 }
 export declare class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeometry> implements gcodeVisitor<JSONGeometry> {
+    private currentOptions;
+    private emitter?;
+    constructor(currentOptions: GCodeToGeometryOptions, emitter?: events.EventEmitter);
     geometry: JSONGeometry;
     currentLine: Partial<CurrentLine>;
+    previusLine: Partial<CurrentLine>;
     settings: CNCSettings;
     position: JSONPosition;
     shallow<T extends object>(source: T): T;
     protected defaultResult(): JSONGeometry;
+    protected roundToPrecision(n: number): number;
     protected emitCurrentLine(): 'G0' | 'G1' | 'G2' | 'G3';
     /**
      * Visit a parse tree produced by `gcodeParser.program`.
@@ -33,8 +40,15 @@ export declare class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeo
      * Visit a parse tree produced by `gcodeParser.segment`.
      * @param ctx the parse tree
      * @return the visitor result
-     */
-    visitSegment(ctx: SegmentContext): JSONGeometry;
+     * /
+       visitSegment(ctx: SegmentContext): JSONGeometry{
+           if (ctx.word()) {
+           //    console.log("S[", ctx.word().text,']')
+               this.visit(ctx.word())
+           }
+        return this.geometry
+       }
+       */
     /**
      * Visit a parse tree produced by `gcodeParser.comment`.
      * @param ctx the parse tree
@@ -351,25 +365,25 @@ export declare class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeo
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG0(ctx: G0Context): JSONGeometry;
+    visitG0(_ctx: G0Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g1`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG1(ctx: G1Context): JSONGeometry;
+    visitG1(_ctx: G1Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g2`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG2(ctx: G2Context): JSONGeometry;
+    visitG2(_ctx: G2Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g3`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG3(ctx: G3Context): JSONGeometry;
+    visitG3(_ctx: G3Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g4`.
      * @param ctx the parse tree
@@ -389,30 +403,323 @@ export declare class InterpreterVisitor extends AbstractParseTreeVisitor<JSONGeo
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG17(ctx: G17Context): JSONGeometry;
+    visitG17(_ctx: G17Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g18`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG18(ctx: G18Context): JSONGeometry;
+    visitG18(_ctx: G18Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g19`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG19(ctx: G19Context): JSONGeometry;
+    visitG19(_ctx: G19Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g20`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG20(ctx: G20Context): JSONGeometry;
+    visitG20(_ctx: G20Context): JSONGeometry;
     /**
      * Visit a parse tree produced by `gcodeParser.g21`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitG21(ctx: G21Context): JSONGeometry;
+    visitG21(_ctx: G21Context): JSONGeometry;
+    /**
+     * Visit a parse tree produced by `gcodeParser.g28`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG28?: (ctx: G28Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g30`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG30?: (ctx: G30Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g38_2`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG38_2?: (ctx: G38_2Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g40`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG40?: (ctx: G40Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g41`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG41?: (ctx: G41Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g42`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG42?: (ctx: G42Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g43`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG43?: (ctx: G43Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g49`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG49?: (ctx: G49Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g53`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG53?: (ctx: G53Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g54`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG54?: (ctx: G54Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g55`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG55?: (ctx: G55Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g56`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG56?: (ctx: G56Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g57`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG57?: (ctx: G57Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g58`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG58?: (ctx: G58Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g59`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG59?: (ctx: G59Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g59_1`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG59_1?: (ctx: G59_1Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g59_2`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG59_2?: (ctx: G59_2Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g59_3`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG59_3?: (ctx: G59_3Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g61`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG61?: (ctx: G61Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g61_1`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG61_1?: (ctx: G61_1Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g64`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG64?: (ctx: G64Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g80`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG80?: (ctx: G80Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g81`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG81?: (ctx: G81Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g82`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG82?: (ctx: G82Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g83`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG83?: (ctx: G83Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g84`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG84?: (ctx: G84Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g85`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG85?: (ctx: G85Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g86`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG86?: (ctx: G86Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g87`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG87?: (ctx: G87Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g88`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG88?: (ctx: G88Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g89`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG89?: (ctx: G89Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g90`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG90?: (ctx: G90Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g91`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG91?: (ctx: G91Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g92`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG92?: (ctx: G92Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g92_1`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG92_1?: (ctx: G92_1Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g92_2`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG92_2?: (ctx: G92_2Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g92_3`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG92_3?: (ctx: G92_3Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g93`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG93?: (ctx: G93Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g94`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG94?: (ctx: G94Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g98`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG98?: (ctx: G98Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.g99`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     * /
+    visitG99?: (ctx: G99Context) => Result;
+   
+    /**
+     * Visit a parse tree produced by `gcodeParser.mWord`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitMWord(_ctx: MWordContext): JSONGeometry;
 }
 export {};
