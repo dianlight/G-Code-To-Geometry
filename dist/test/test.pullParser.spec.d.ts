@@ -1,1 +1,1 @@
-export {};
+import 'jest-fetch-mock';

@@ -3,7 +3,8 @@ import path from 'path';
 import fs from 'fs';
 import deepEqual from 'deep-equal'
 import { JSONError, JSONGeometry, JSONGeometryEvent, JSONGeometryLine } from "../src/JSONGeometry";
-
+import { ReadableStream } from "web-streams-polyfill/ponyfill/es2018"
+//import { ReadableStream } from "@stardazed/streams"
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function roughSizeOfObject( object ):number {
 
@@ -57,12 +58,21 @@ export function doParserTest(gcodename: string, options: Partial<GCodeToGeometry
     }
 }
 
-export async function doParserTestAsync(gcodename: string, options: Partial<GCodeToGeometryOptions>): Promise<void> {
+export async function doParserTestAsync(gcodename: string, options: Partial<GCodeToGeometryOptions>): Promise<number> {
     return new Promise((resolve) => {
-        const code = fs.createReadStream(path.join(__dirname, gcodename + '.gcode'));
         const result = JSON.parse(fs.readFileSync(path.join(__dirname, gcodename + '.json')).toString()) as JSONGeometry;
         expect(pullParser).toBeDefined();
-        const _cresult = pullParser(code, options);
+        const bufferFile = fs.readFileSync(path.join(__dirname, gcodename + '.gcode')).toString().split('\n');
+        const reader = new ReadableStream({
+            start(controller) {
+                while (bufferFile.length > 0) {
+                    const data = bufferFile.shift()+"\n";
+                    controller.enqueue(Uint8Array.from(data.split("").map( c => c.charCodeAt(0))))
+                }
+                controller.close();
+            }
+        });
+        const _cresult = pullParser(reader, options);            
         expect(_cresult).toBeDefined();
         let p = 0, e = 0, c = 0;
         _cresult.then((_ev) => {
@@ -71,20 +81,22 @@ export async function doParserTestAsync(gcodename: string, options: Partial<GCod
             })                
             _ev.on(JSONGeometryEvent.LINE.toString(), (line: JSONGeometryLine) => {
                 if (deepEqual(line, result.lines[p++])) return
-                expect(JSON.stringify(line,null,2)).toEqual(JSON.stringify(result.lines[p],null,2))
+                expect(JSON.stringify(line, null, 2)).toEqual(JSON.stringify(result.lines[p], null, 2))
+//                console.log(JSON.stringify(result.lines[p]))
             })                
             _ev.on(JSONGeometryEvent.ARC.toString(), (line: JSONGeometryLine) => {
                 expect(line).toEqual(result.lines[p++])
+//                console.log(JSON.stringify(result.lines[p]))
             })                
             _ev.on(JSONGeometryEvent.ERROR.toString(), (error: JSONError) => {
 //                expect(error).toEqual(result.errorList[e++])
             })                
-            _ev.on(JSONGeometryEvent.END.toString(), (result: JSONGeometry) => {
-                expect(result.size).toEqual(result.size)
-                resolve()
+            _ev.on(JSONGeometryEvent.END.toString(), (cresult: JSONGeometry) => {
+//                console.log("End",cresult.size)
+                expect(cresult.size).toEqual(result.size)
+                resolve(p)
             })
             _ev.emit(JSONGeometryEvent.BEGIN.toString())
         })
     })
-
 }
