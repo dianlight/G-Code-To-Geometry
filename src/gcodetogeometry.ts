@@ -641,3 +641,5 @@ export function parse(code:string, options?: Partial<GCodeToGeometryOptions>): J
     };
   /*  */
 }
+
+export * from './JSONGeometry'

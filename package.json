@@ -4,13 +4,14 @@
     "description": "Parse GCode into geometrical lines and curves.",
     "main": "test/test.js",
     "module": "dist/gcodetogeometry.js",
-    "types": "dist/index.d.ts",
+    "types": "dist/src/gcodetogeometry.d.ts",
     "scripts": {
         "test": "jest --runInBand --logHeapUsage",
-        "build": "webpack --config webpack.config.js && npm run dts",
+        "build": "webpack --config webpack.config.js",
         "dts": "tsc -p tsconfig.declaration.json",
         "serve": "webpack serve --mode=development --config webpack.config.js",
-        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4"
+        "antlr4ts": "antlr4ts -visitor src/antlr/gcode.g4",
+        "clean": "rimraf dist"
     },
     "repository": {
         "type": "git",
@@ -46,6 +47,7 @@
         "jest-progress-bar-reporter": "^1.0.21",
         "jest-spec-reporter": "^1.0.17",
         "node-polyfill-webpack-plugin": "^1.1.2",
+        "rimraf": "^2.7.1",
         "ts-jest": "^26.5.6",
         "ts-loader": "^9.2.1",
         "web-streams-polyfill": "^3.0.3",
